@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1B3DB228254751F400930183 /* CustomTextFieldCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B3DB227254751F400930183 /* CustomTextFieldCell.swift */; };
+		1B3DB22D2547544F00930183 /* DropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B3DB22C2547544F00930183 /* DropView.swift */; };
+		1B3DB23125476CAF00930183 /* StreamReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B3DB23025476CAF00930183 /* StreamReader.swift */; };
 		44DA99232546FC8A00EC9447 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DA99222546FC8A00EC9447 /* AppDelegate.swift */; };
 		44DA99252546FC8A00EC9447 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44DA99242546FC8A00EC9447 /* ViewController.swift */; };
 		44DA99272546FC8C00EC9447 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44DA99262546FC8C00EC9447 /* Assets.xcassets */; };
@@ -14,6 +17,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1B3DB227254751F400930183 /* CustomTextFieldCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextFieldCell.swift; sourceTree = "<group>"; };
+		1B3DB22C2547544F00930183 /* DropView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropView.swift; sourceTree = "<group>"; };
+		1B3DB23025476CAF00930183 /* StreamReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamReader.swift; sourceTree = "<group>"; };
 		44DA991F2546FC8A00EC9447 /* Convertor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Convertor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44DA99222546FC8A00EC9447 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		44DA99242546FC8A00EC9447 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -34,6 +40,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1B3DB226254751E200930183 /* CustomUI */ = {
+			isa = PBXGroup;
+			children = (
+				1B3DB227254751F400930183 /* CustomTextFieldCell.swift */,
+				1B3DB22C2547544F00930183 /* DropView.swift */,
+			);
+			path = CustomUI;
+			sourceTree = "<group>";
+		};
+		1B3DB22F25476CA400930183 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				1B3DB23025476CAF00930183 /* StreamReader.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
 		44DA99162546FC8A00EC9447 = {
 			isa = PBXGroup;
 			children = (
@@ -53,6 +76,8 @@
 		44DA99212546FC8A00EC9447 /* Convertor */ = {
 			isa = PBXGroup;
 			children = (
+				1B3DB22F25476CA400930183 /* Helpers */,
+				1B3DB226254751E200930183 /* CustomUI */,
 				44DA99222546FC8A00EC9447 /* AppDelegate.swift */,
 				44DA99242546FC8A00EC9447 /* ViewController.swift */,
 				44DA99262546FC8C00EC9447 /* Assets.xcassets */,
@@ -132,7 +157,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B3DB23125476CAF00930183 /* StreamReader.swift in Sources */,
 				44DA99252546FC8A00EC9447 /* ViewController.swift in Sources */,
+				1B3DB22D2547544F00930183 /* DropView.swift in Sources */,
+				1B3DB228254751F400930183 /* CustomTextFieldCell.swift in Sources */,
 				44DA99232546FC8A00EC9447 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -274,7 +302,7 @@
 				CODE_SIGN_ENTITLEMENTS = Convertor/Convertor.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 2H8C9U8733;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Convertor/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -295,7 +323,7 @@
 				CODE_SIGN_ENTITLEMENTS = Convertor/Convertor.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 2H8C9U8733;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Convertor/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

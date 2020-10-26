@@ -1,7 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="11134" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11134"/>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="17156"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--Application-->
@@ -673,7 +675,7 @@
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
-                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModuleProvider="target"/>
+                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Convertor" customModuleProvider="target"/>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -703,15 +705,78 @@
         <!--View Controller-->
         <scene sceneID="hIz-AP-VOD">
             <objects>
-                <viewController id="XfG-lQ-9wD" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="XfG-lQ-9wD" customClass="ViewController" customModule="Convertor" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="m2S-Jp-Qdl">
-                        <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                        <rect key="frame" x="0.0" y="0.0" width="710" height="754"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="mUr-bv-suY">
+                                <rect key="frame" x="193" y="203" width="324" height="348"/>
+                                <subviews>
+                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ahM-NE-DAx">
+                                        <rect key="frame" x="180" y="0.0" width="144" height="48"/>
+                                        <textFieldCell key="cell" alignment="center" title="Здесь появится конвертирвоанный файл" drawsBackground="YES" id="fHh-Kf-NOy" customClass="CustomTextFieldCell" customModule="Convertor" customModuleProvider="target">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                    </textField>
+                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="ZDm-Ia-RUG" customClass="DropView" customModule="Convertor" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="60" width="144" height="288"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="288" id="aJF-Ez-8xV"/>
+                                            <constraint firstAttribute="width" constant="144" id="za7-yb-yiE"/>
+                                        </constraints>
+                                    </customView>
+                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="fUA-q4-634">
+                                        <rect key="frame" x="180" y="60" width="144" height="288"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="144" id="51t-Rn-6n3"/>
+                                            <constraint firstAttribute="height" constant="288" id="JSZ-hQ-KEh"/>
+                                        </constraints>
+                                    </customView>
+                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0Cf-QX-iSm">
+                                        <rect key="frame" x="0.0" y="16" width="144" height="32"/>
+                                        <textFieldCell key="cell" alignment="center" title="Поместите ваш файл здесь" drawsBackground="YES" id="XbY-b3-n4m" customClass="CustomTextFieldCell" customModule="Convertor" customModuleProvider="target">
+                                            <font key="font" usesAppearanceFont="YES"/>
+                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                    </textField>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="bottom" secondItem="ahM-NE-DAx" secondAttribute="bottom" id="32n-BC-jkI"/>
+                                    <constraint firstItem="ZDm-Ia-RUG" firstAttribute="leading" secondItem="mUr-bv-suY" secondAttribute="leading" id="Cxc-XC-nhl"/>
+                                    <constraint firstItem="ahM-NE-DAx" firstAttribute="leading" secondItem="fUA-q4-634" secondAttribute="leading" id="QgH-fs-Jqm"/>
+                                    <constraint firstItem="ahM-NE-DAx" firstAttribute="top" secondItem="fUA-q4-634" secondAttribute="bottom" constant="12" id="R1i-sy-8pc"/>
+                                    <constraint firstItem="fUA-q4-634" firstAttribute="top" secondItem="mUr-bv-suY" secondAttribute="top" id="VXv-nb-IJD"/>
+                                    <constraint firstItem="ahM-NE-DAx" firstAttribute="trailing" secondItem="fUA-q4-634" secondAttribute="trailing" id="aWL-6Z-Bkk"/>
+                                    <constraint firstItem="0Cf-QX-iSm" firstAttribute="trailing" secondItem="ZDm-Ia-RUG" secondAttribute="trailing" id="csy-b3-HD2"/>
+                                    <constraint firstItem="0Cf-QX-iSm" firstAttribute="leading" secondItem="ZDm-Ia-RUG" secondAttribute="leading" id="e7g-0k-7KE"/>
+                                    <constraint firstItem="0Cf-QX-iSm" firstAttribute="top" secondItem="ZDm-Ia-RUG" secondAttribute="bottom" constant="12" id="pVo-5c-Vy0"/>
+                                    <constraint firstAttribute="trailing" secondItem="fUA-q4-634" secondAttribute="trailing" id="sBW-X9-W6o"/>
+                                    <constraint firstItem="fUA-q4-634" firstAttribute="centerY" secondItem="ZDm-Ia-RUG" secondAttribute="centerY" id="u6E-YT-KhH"/>
+                                    <constraint firstItem="fUA-q4-634" firstAttribute="leading" secondItem="ZDm-Ia-RUG" secondAttribute="trailing" constant="36" id="ud7-rZ-Rlw"/>
+                                </constraints>
+                            </customView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="mUr-bv-suY" firstAttribute="centerY" secondItem="m2S-Jp-Qdl" secondAttribute="centerY" id="3fo-iq-2Os"/>
+                            <constraint firstItem="mUr-bv-suY" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="fAS-Io-J4S"/>
+                            <constraint firstItem="mUr-bv-suY" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="36" id="nzi-hh-487"/>
+                            <constraint firstItem="mUr-bv-suY" firstAttribute="top" relation="greaterThanOrEqual" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="36" id="oP2-1A-Axy"/>
+                        </constraints>
                     </view>
+                    <connections>
+                        <outlet property="leftDropView" destination="ZDm-Ia-RUG" id="VMa-kq-IBR"/>
+                        <outlet property="leftLabel" destination="0Cf-QX-iSm" id="WIk-p8-2fk"/>
+                        <outlet property="rightDropView" destination="fUA-q4-634" id="zVh-i2-WhL"/>
+                        <outlet property="rightLabel" destination="ahM-NE-DAx" id="gyn-EJ-HsQ"/>
+                    </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="655"/>
+            <point key="canvasLocation" x="269.5" y="1085.5"/>
         </scene>
     </scenes>
 </document>
