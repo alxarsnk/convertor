@@ -714,8 +714,8 @@
                                 <rect key="frame" x="193" y="203" width="324" height="348"/>
                                 <subviews>
                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ahM-NE-DAx">
-                                        <rect key="frame" x="180" y="0.0" width="144" height="48"/>
-                                        <textFieldCell key="cell" alignment="center" title="Здесь появится конвертирвоанный файл" drawsBackground="YES" id="fHh-Kf-NOy" customClass="CustomTextFieldCell" customModule="Convertor" customModuleProvider="target">
+                                        <rect key="frame" x="178" y="0.0" width="148" height="48"/>
+                                        <textFieldCell key="cell" alignment="center" title="Здесь появится конвертирвоанный файл" id="fHh-Kf-NOy" customClass="CustomTextFieldCell" customModule="Convertor" customModuleProvider="target">
                                             <font key="font" metaFont="system"/>
                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
@@ -736,23 +736,39 @@
                                         </constraints>
                                     </customView>
                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0Cf-QX-iSm">
-                                        <rect key="frame" x="0.0" y="16" width="144" height="32"/>
-                                        <textFieldCell key="cell" alignment="center" title="Поместите ваш файл здесь" drawsBackground="YES" id="XbY-b3-n4m" customClass="CustomTextFieldCell" customModule="Convertor" customModuleProvider="target">
+                                        <rect key="frame" x="-2" y="16" width="148" height="32"/>
+                                        <textFieldCell key="cell" alignment="center" title="Поместите ваш файл здесь" id="XbY-b3-n4m" customClass="CustomTextFieldCell" customModule="Convertor" customModuleProvider="target">
                                             <font key="font" usesAppearanceFont="YES"/>
                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="backgroundColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                         </textFieldCell>
                                     </textField>
+                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="SEp-v3-iqT">
+                                        <rect key="frame" x="212" y="20" width="81" height="32"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="69" id="Mih-sW-Jro"/>
+                                            <constraint firstAttribute="height" constant="21" id="mHe-m2-qzw"/>
+                                        </constraints>
+                                        <buttonCell key="cell" type="push" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="55C-9x-90B">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="saveButtonPressed:" target="XfG-lQ-9wD" id="mKJ-mS-g0D"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="ahM-NE-DAx" secondAttribute="bottom" id="32n-BC-jkI"/>
                                     <constraint firstItem="ZDm-Ia-RUG" firstAttribute="leading" secondItem="mUr-bv-suY" secondAttribute="leading" id="Cxc-XC-nhl"/>
                                     <constraint firstItem="ahM-NE-DAx" firstAttribute="leading" secondItem="fUA-q4-634" secondAttribute="leading" id="QgH-fs-Jqm"/>
                                     <constraint firstItem="ahM-NE-DAx" firstAttribute="top" secondItem="fUA-q4-634" secondAttribute="bottom" constant="12" id="R1i-sy-8pc"/>
+                                    <constraint firstItem="ahM-NE-DAx" firstAttribute="top" secondItem="SEp-v3-iqT" secondAttribute="top" id="T6z-bV-Xzw"/>
                                     <constraint firstItem="fUA-q4-634" firstAttribute="top" secondItem="mUr-bv-suY" secondAttribute="top" id="VXv-nb-IJD"/>
                                     <constraint firstItem="ahM-NE-DAx" firstAttribute="trailing" secondItem="fUA-q4-634" secondAttribute="trailing" id="aWL-6Z-Bkk"/>
                                     <constraint firstItem="0Cf-QX-iSm" firstAttribute="trailing" secondItem="ZDm-Ia-RUG" secondAttribute="trailing" id="csy-b3-HD2"/>
                                     <constraint firstItem="0Cf-QX-iSm" firstAttribute="leading" secondItem="ZDm-Ia-RUG" secondAttribute="leading" id="e7g-0k-7KE"/>
+                                    <constraint firstItem="SEp-v3-iqT" firstAttribute="centerX" secondItem="ahM-NE-DAx" secondAttribute="centerX" id="gD6-Uo-Gsu"/>
                                     <constraint firstItem="0Cf-QX-iSm" firstAttribute="top" secondItem="ZDm-Ia-RUG" secondAttribute="bottom" constant="12" id="pVo-5c-Vy0"/>
                                     <constraint firstAttribute="trailing" secondItem="fUA-q4-634" secondAttribute="trailing" id="sBW-X9-W6o"/>
                                     <constraint firstItem="fUA-q4-634" firstAttribute="centerY" secondItem="ZDm-Ia-RUG" secondAttribute="centerY" id="u6E-YT-KhH"/>
@@ -772,6 +788,7 @@
                         <outlet property="leftLabel" destination="0Cf-QX-iSm" id="WIk-p8-2fk"/>
                         <outlet property="rightDropView" destination="fUA-q4-634" id="zVh-i2-WhL"/>
                         <outlet property="rightLabel" destination="ahM-NE-DAx" id="gyn-EJ-HsQ"/>
+                        <outlet property="saveButton" destination="SEp-v3-iqT" id="WV7-FW-TgD"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
