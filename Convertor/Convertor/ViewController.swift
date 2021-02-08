@@ -41,6 +41,8 @@ class ViewController: NSViewController, DropViewDelegate {
         }
     }
     
+    // MARK: - Настройить UI
+    
     private func setupLabels() {
         leftLabel.alignment = .center
         rightLabel.alignment = .center
@@ -91,6 +93,7 @@ class ViewController: NSViewController, DropViewDelegate {
     }
     var views: [String] = ["viewController", "view", "subviews", "tableView", "tableViewCell", "tableViewCellContentView", "imageView", "label", "rect", "color", "constraints"]
 
+    // MARK: - Драг'n'дроп делегат
     
     func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         guard let pasteboard = sender.draggingPasteboard.propertyList(forType: NSPasteboard.PasteboardType(rawValue: "NSFilenamesPboardType")) as? NSArray,
@@ -126,76 +129,65 @@ class ViewController: NSViewController, DropViewDelegate {
         return true
     }
     
-    private func generateHeader(fileName: String) -> String {
-        let date = Date()
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yyyy"
-        return """
-            //
-            //  \(fileName).swift
-            //
-            //  Created by Convertor on \(formatter.string(from: date)).
-            //  Copyright © 2020 Personal Team. All rights reserved.
-            //\n
-            """
-    }
-    
-    private func generateTemplate(fileName: String) -> String {
-        return """
-            import SwiftUI
-
-            struct \(fileName): View {
-                var body: some View {
-                    \(beginParsing())
-                }
-            }
-
-            struct \(fileName)_Previews: PreviewProvider {
-                static var previews: some View {
-                    \(fileName)()
-                }
-            }
-            """
-    }
-    
     private func beginParsing() -> String {
         let xml = XML(string: sourceCode, encoding: .utf8)
-        getXmlChildrens(for: xml.scenes.scene.objects.viewController.view.subviews.xml!, level: 0)
-        print(generateSwiftUIStruct(with: 0))
+        getXmlChildrens(for: xml.scenes.scene.objects.viewController.view.subviews.xml!, level: 0, rootId: nil)
+        print(generateSwiftUIStruct(with: 0, rootId: nil))
         return "Text(\"Parsing\")"
     }
     
-    func getXmlChildrens(for xml: XML, level: Int) {
+    // MARK: - Рекрурсивно пройтись по XML файлу и сгенирировать промежутчоные модели
+    
+    func getXmlChildrens(for xml: XML, level: Int, rootId: UUID?) {
         for children in xml.xmlChildren {
             if children.xmlName == "tableView" {
-                getInfoAboutXML(children, level: level)
-                getXmlChildrens(for: children.prototypes.xml!, level: level)
+                let id = getInfoAboutXML(children, level: level, rootId: rootId)
+                getXmlChildrens(for: children.prototypes.xml!, level: level, rootId: id)
             } else if children.xmlName == "tableViewCell" {
                 let lvl = level + 1
-                getInfoAboutXML(children, level: lvl)
-                getXmlChildrens(for: children.tableViewCellContentView.subviews.xml!, level: lvl)
+                let id = getInfoAboutXML(children, level: lvl, rootId: rootId)
+                getXmlChildrens(for: children.tableViewCellContentView.subviews.xml!, level: lvl, rootId: id)
             } else {
                 let lvl = level + 1
-                getInfoAboutXML(children, level: lvl)
+                getInfoAboutXML(children, level: lvl, rootId: rootId)
             }
         }
     }
     
-    func getInfoAboutXML(_ xml: XML, level: Int) {
-        models.append(StagedModel(xml: xml, level: level))
+    func getInfoAboutXML(_ xml: XML, level: Int, rootId: UUID?) -> UUID {
+        let model = StagedModel(xml: xml, level: level, rootId: rootId)
+        models.append(model)
+        return model.id
     }
     
-    func generateSwiftUIStruct(with index: Int) -> String {
-        while index <= models.count - 1 {
-                return generateElement(
-                    from: ElementType(rawValue: models[index].xml.xmlName)!,
-                    insertingText: generateSwiftUIStruct(with: index + 1),
-                    spaces: models[index].level
+    
+    // MARK: - Рекурсивно пройтись по моделям и сгенировать SwiftUI структуру
+    
+    func generateSwiftUIStruct(with nestedIndex: Int, rootId: UUID?) -> String {
+        while nestedIndex <= models.count - 1 {
+            var result = ""
+            var filteredArray = StagedModels()
+            if nestedIndex == 0 {
+                filteredArray = models.filter({$0.level == nestedIndex})
+            } else {
+                filteredArray = models.filter({$0.level == nestedIndex && $0.rootId == rootId})
+            }
+            filteredArray.forEach({ element in
+                result.append(
+                    generateElement(
+                        from: ElementType(rawValue: element.xml.xmlName)!,
+                        insertingText: generateSwiftUIStruct(with: nestedIndex + 1, rootId: element.id),
+                        spaces: element.level
+                    )
                 )
+            })
+            return result
         }
         return ""
     }
  
+    // MARK: - Методы вспомогательные для генерации
+    
     private func generateElement(from element: ElementType, insertingText: String, spaces: Int) -> String {
         switch element {
         case .tableView:
@@ -215,7 +207,7 @@ class ViewController: NSViewController, DropViewDelegate {
             """
             \(spacesString)List(0..<10) { _ in
             \(insertingText)
-            \(spacesString)
+            \(spacesString)}
             """
     }
     
@@ -257,4 +249,35 @@ class ViewController: NSViewController, DropViewDelegate {
             """
     }
     
+    private func generateHeader(fileName: String) -> String {
+        let date = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yyyy"
+        return """
+            //
+            //  \(fileName).swift
+            //
+            //  Created by Convertor on \(formatter.string(from: date)).
+            //  Copyright © 2020 Personal Team. All rights reserved.
+            //\n
+            """
+    }
+    
+    private func generateTemplate(fileName: String) -> String {
+        return """
+            import SwiftUI
+
+            struct \(fileName): View {
+                var body: some View {
+                    \(beginParsing())
+                }
+            }
+
+            struct \(fileName)_Previews: PreviewProvider {
+                static var previews: some View {
+                    \(fileName)()
+                }
+            }
+            """
+    }
 }
