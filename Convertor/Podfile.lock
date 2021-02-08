@@ -1,0 +1,20 @@
+PODS:
+  - SwiftyXML (3.1.0)
+  - XMLCoder (0.11.1)
+
+DEPENDENCIES:
+  - SwiftyXML
+  - XMLCoder
+
+SPEC REPOS:
+  trunk:
+    - SwiftyXML
+    - XMLCoder
+
+SPEC CHECKSUMS:
+  SwiftyXML: 1ea095c1416039db95cb050f0a34559b061ede93
+  XMLCoder: c4638336674de7ba279cd23f2005817d69f538e0
+
+PODFILE CHECKSUM: 5474aaf86a777d8b2c7192f7d4b528aeccec23a5
+
+COCOAPODS: 1.9.3
