@@ -91,7 +91,30 @@ class ViewController: NSViewController, DropViewDelegate {
     var depthIndent: String {
         return [String](repeating: "  ", count: self.depth).joined()
     }
-    var views: [String] = ["viewController", "view", "subviews", "tableView", "tableViewCell", "tableViewCellContentView", "imageView", "label", "rect", "color", "constraints"]
+    var views: [String] = [
+        "viewController",
+        "view",
+        "subviews",
+        "tableView",
+        "tableViewCell",
+        "tableViewCellContentView",
+        "imageView",
+        "label",
+        "rect",
+        "color",
+        "constraints",
+        "button",
+        "contentMode",
+        "segmentedControl",
+        "switch",
+        "textField",
+        "textView",
+        "activityIndicatorView",
+        "pageControl",
+        "collectionView",
+        "collectionViewCell",
+        "stackView"
+    ]
 
     // MARK: - Драг'n'дроп делегат
     
@@ -132,7 +155,12 @@ class ViewController: NSViewController, DropViewDelegate {
     private func beginParsing() -> String {
         let xml = XML(string: sourceCode, encoding: .utf8)
         getXmlChildrens(for: xml.scenes.scene.objects.viewController.view.subviews.xml!, level: 0, rootId: nil)
-        print(generateSwiftUIStruct(with: 0, rootId: nil))
+        print(
+            generateSwiftUIStruct(with: 0, rootId: nil)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .components(separatedBy: .newlines)
+                .filter{!$0.isEmpty}.joined(separator: "\n")
+        )
         return "Text(\"Parsing\")"
     }
     
@@ -142,14 +170,21 @@ class ViewController: NSViewController, DropViewDelegate {
         for children in xml.xmlChildren {
             if children.xmlName == "tableView" {
                 let id = getInfoAboutXML(children, level: level, rootId: rootId)
-                getXmlChildrens(for: children.prototypes.xml!, level: level, rootId: id)
+                getXmlChildrens(for: children.prototypes.xml!, level: level + 1, rootId: id)
             } else if children.xmlName == "tableViewCell" {
-                let lvl = level + 1
-                let id = getInfoAboutXML(children, level: lvl, rootId: rootId)
-                getXmlChildrens(for: children.tableViewCellContentView.subviews.xml!, level: lvl, rootId: id)
+                let id = getInfoAboutXML(children, level: level, rootId: rootId)
+                getXmlChildrens(for: children.tableViewCellContentView.subviews.xml!, level: level + 1, rootId: id)
+            } else if children.xmlName == "collectionViewCell" {
+                let id = getInfoAboutXML(children, level: level, rootId: rootId)
+                getXmlChildrens(for: children.collectionViewCellContentView.subviews.xml!, level: level + 1, rootId: id)
+            } else if children.xmlName == "collectionView" {
+                let id = getInfoAboutXML(children, level: level, rootId: rootId)
+                getXmlChildrens(for: children.cells.xml!, level: level + 1, rootId: id)
+            } else if children.xmlName == "view" || children.xmlName == "stackView" {
+                let id = getInfoAboutXML(children, level: level, rootId: rootId)
+                getXmlChildrens(for: children.subviews.xml!, level: level + 1, rootId: id)
             } else {
-                let lvl = level + 1
-                getInfoAboutXML(children, level: lvl, rootId: rootId)
+                getInfoAboutXML(children, level: level, rootId: rootId)
             }
         }
     }
@@ -174,8 +209,8 @@ class ViewController: NSViewController, DropViewDelegate {
             }
             filteredArray.forEach({ element in
                 result.append(
-                    generateElement(
-                        from: ElementType(rawValue: element.xml.xmlName)!,
+                    ElementGenerator.shared.generateElement(
+                        from: element.xml,
                         insertingText: generateSwiftUIStruct(with: nestedIndex + 1, rootId: element.id),
                         spaces: element.level
                     )
@@ -187,67 +222,6 @@ class ViewController: NSViewController, DropViewDelegate {
     }
  
     // MARK: - Методы вспомогательные для генерации
-    
-    private func generateElement(from element: ElementType, insertingText: String, spaces: Int) -> String {
-        switch element {
-        case .tableView:
-            return generateTableView(insertingText: insertingText, spaces: spaces)
-        case .imageView:
-            return generateImageView(insertingText: insertingText, spaces: spaces)
-        case .label:
-            return generateLabel(insertingText: insertingText, spaces: spaces)
-        case .tableViewCell:
-            return generateVStack(insertingText: insertingText, spaces: spaces)
-        }
-    }
-    
-    private func generateTableView(insertingText: String = "", spaces: Int) -> String {
-        let spacesString = String(repeating: " ", count: spaces)
-        return
-            """
-            \(spacesString)List(0..<10) { _ in
-            \(insertingText)
-            \(spacesString)}
-            """
-    }
-    
-    private func generateHStack(insertingText: String = "", spaces: Int) -> String {
-        let spacesString = String(repeating: " ", count: spaces)
-        return
-            """
-            \(spacesString)HStack() {
-            \(insertingText)
-            \(spacesString)}
-            """
-    }
-    
-    private func generateVStack(insertingText: String = "", spaces: Int) -> String {
-        let spacesString = String(repeating: " ", count: spaces)
-        return
-            """
-            \(spacesString)VStack() {
-            \(insertingText)
-            \(spacesString)}
-            """
-    }
-    
-    private func generateLabel(insertingText: String = "", spaces: Int) -> String {
-        let spacesString = String(repeating: " ", count: spaces)
-        let text = insertingText == "" ? insertingText : "\n"+insertingText
-        return
-            """
-            \(spacesString)Text("")\(text)
-            """
-    }
-    
-    private func generateImageView(insertingText: String = "", spaces: Int) -> String {
-        let spacesString = String(repeating: " ", count: spaces)
-        let text = insertingText == "" ? insertingText : "\n"+insertingText
-        return
-            """
-            \(spacesString)Image()\(text)
-            """
-    }
     
     private func generateHeader(fileName: String) -> String {
         let date = Date()

@@ -12,4 +12,15 @@ enum ElementType: String {
     case tableViewCell
     case imageView
     case label
+    case button
+    case view
+    case segmentedControl
+    case switchControl = "switch"
+    case textField
+    case textView
+    case activityIndicatorView
+    case pageControl
+    case collectionView
+    case collectionViewCell
+    case stackView
 }
