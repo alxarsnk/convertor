@@ -139,14 +139,16 @@ class ViewController: NSViewController, DropViewDelegate {
             setupCOnvertedReadyState()
         }
         fileText.append(
-            generateHeader(
+            ElementGenerator.shared.generateHeader(
                 fileName: String(url.lastPathComponent.dropLast(11))
             )
         )
         
         fileText.append(
-            generateTemplate(
-                fileName: String(url.lastPathComponent.dropLast(11))
+            ElementGenerator.shared.generateTemplate(
+                fileName: String(url.lastPathComponent.dropLast(11)), completion: {
+                    beginParsing()
+                }
             )
         )
         return true
@@ -221,37 +223,4 @@ class ViewController: NSViewController, DropViewDelegate {
         return ""
     }
  
-    // MARK: - Методы вспомогательные для генерации
-    
-    private func generateHeader(fileName: String) -> String {
-        let date = Date()
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yyyy"
-        return """
-            //
-            //  \(fileName).swift
-            //
-            //  Created by Convertor on \(formatter.string(from: date)).
-            //  Copyright © 2020 Personal Team. All rights reserved.
-            //\n
-            """
-    }
-    
-    private func generateTemplate(fileName: String) -> String {
-        return """
-            import SwiftUI
-
-            struct \(fileName): View {
-                var body: some View {
-                    \(beginParsing())
-                }
-            }
-
-            struct \(fileName)_Previews: PreviewProvider {
-                static var previews: some View {
-                    \(fileName)()
-                }
-            }
-            """
-    }
 }

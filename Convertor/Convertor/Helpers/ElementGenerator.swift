@@ -12,6 +12,12 @@ class ElementGenerator {
     
     static var shared = ElementGenerator()
     
+    private var isActivityViewAdded = false
+    private var isPageCotnrolAdded = false
+    private var isTextViewAdded = false
+    
+    private var customElements = ""
+    
     private init() { }
     
     func generateElement(from xml: XML, insertingText: String, spaces: Int) -> String {
@@ -154,6 +160,7 @@ class ElementGenerator {
     private func generateTextView(insertingText: String = "", spaces: Int) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         let text = insertingText
+        makeTextView()
         return
             """
             \(spacesString)TextView(text: .constant(""), textStyle: .constant())\(text)
@@ -164,6 +171,7 @@ class ElementGenerator {
     private func generateActivityView(insertingText: String = "", spaces: Int) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         let text = insertingText
+        makeActivityView()
         return
             """
             \(spacesString)ActivityIndicator(shouldAnimate: .constant(true))\(text)
@@ -184,6 +192,7 @@ class ElementGenerator {
     private func generatePageControl(insertingText: String = "", spaces: Int) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         let text = insertingText
+        makePageControl()
         return
             """
             \(spacesString)PageControl(numberOfPages: 3, currentPage: .constant(0))\(text)
@@ -200,6 +209,136 @@ class ElementGenerator {
                                 .pickerStyle(SegmentedPickerStyle())\(text)
 
             """
+    }
+    
+    func generateHeader(fileName: String) -> String {
+        let date = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yyyy"
+        return """
+            //
+            //  \(fileName).swift
+            //
+            //  Created by Convertor on \(formatter.string(from: date)).
+            //  Copyright © 2020 Personal Team. All rights reserved.
+            //\n
+            """
+    }
+    
+    func generateTemplate(fileName: String, completion: (() -> Void)) -> String {
+        return """
+            import SwiftUI
+
+            struct \(fileName): View {
+                var body: some View {
+                    \(completion())
+                }
+            }
+
+            struct \(fileName)_Previews: PreviewProvider {
+                static var previews: some View {
+                    \(fileName)()
+                }
+            }
+            
+            """
+    }
+    
+    private func makeActivityView() {
+        guard !isActivityViewAdded else { return }
+        let activityView = """
+        struct ActivityIndicator: UIViewRepresentable {
+        @Binding var shouldAnimate: Bool
+        
+        func makeUIView(context: Context) -> UIActivityIndicatorView {
+            return UIActivityIndicatorView()
+        }
+
+        func updateUIView(_ uiView: UIActivityIndicatorView,
+                      context: Context) {
+            if self.shouldAnimate {
+                uiView.startAnimating()
+            } else {
+                uiView.stopAnimating()
+            }
+        }
+        }
+        
+        """
+        customElements.append(activityView)
+    }
+    
+    private func makePageControl() {
+        guard !isPageCotnrolAdded else { return }
+        let pageControl = """
+        struct PageControl: UIViewRepresentable {
+            var numberOfPages: Int
+            @Binding var currentPage: Int
+
+            func makeCoordinator() -> Coordinator {
+                Coordinator(self)
+            }
+
+            func makeUIView(context: Context) -> UIPageControl {
+                let control = UIPageControl()
+                control.numberOfPages = numberOfPages
+                control.addTarget(
+                    context.coordinator,
+                    action: #selector(Coordinator.updateCurrentPage(sender:)),
+                    for: .valueChanged)
+
+                return control
+            }
+
+            func updateUIView(_ uiView: UIPageControl, context: Context) {
+                uiView.currentPage = currentPage
+            }
+
+            class Coordinator: NSObject {
+                var control: PageControl
+
+                init(_ control: PageControl) {
+                    self.control = control
+                }
+
+                @objc
+                func updateCurrentPage(sender: UIPageControl) {
+                    control.currentPage = sender.currentPage
+                }
+            }
+        }
+        
+        """
+        customElements.append(pageControl)
+    }
+    
+    private func makeTextView() {
+        guard !isTextViewAdded else { return }
+        let textView = """
+        struct TextView: UIViewRepresentable {
+         
+            @Binding var text: String
+            @Binding var textStyle: UIFont.TextStyle
+         
+            func makeUIView(context: Context) -> UITextView {
+                let textView = UITextView()
+         
+                textView.font = UIFont.preferredFont(forTextStyle: textStyle)
+                textView.autocapitalizationType = .sentences
+                textView.isSelectable = true
+                textView.isUserInteractionEnabled = true
+         
+                return textView
+            }
+         
+            func updateUIView(_ uiView: UITextView, context: Context) {
+                uiView.text = text
+                uiView.font = UIFont.preferredFont(forTextStyle: textStyle)
+            }
+        }
+        
+        """
+        customElements.append(textView)
     }
     
 }
