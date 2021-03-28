@@ -23,4 +23,5 @@ enum ElementType: String {
     case collectionView
     case collectionViewCell
     case stackView
+    case viewController
 }

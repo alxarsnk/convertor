@@ -20,8 +20,8 @@ class ElementGenerator {
     
     private init() { }
     
-    func generateElement(from xml: XML, insertingText: String, spaces: Int) -> String {
-        let element = ElementType(rawValue: xml.xmlName)!
+    func generateElement(from xml: XML, insertingText: String, spaces: Int, elementType: ViewType) -> String {
+        guard let element = ElementType(rawValue: xml.xmlName) else { return skipElment(insertingText: insertingText, spaces: spaces) }
         switch element {
         case .tableView:
             return generateTableView(insertingText: insertingText, spaces: spaces)
@@ -32,7 +32,11 @@ class ElementGenerator {
         case .tableViewCell:
             return generateVStack(insertingText: insertingText, spaces: spaces)
         case .view:
-            return generateVStack(insertingText: insertingText, spaces: spaces)
+            if elementType == .xml && spaces == 0 {
+                return generateRootView(insertingText: insertingText, spaces: spaces)
+            } else {
+                return generateVStack(insertingText: insertingText, spaces: spaces)
+            }
         case .button:
             return generateButton(insertingText: insertingText, spaces: spaces)
         case .stackView:
@@ -58,6 +62,8 @@ class ElementGenerator {
             return generateСollectionView(insertingText: insertingText, spaces: spaces)
         case .collectionViewCell:
             return generateHStack(insertingText: insertingText, spaces: spaces)
+        case .viewController:
+            return generateRootView(insertingText: insertingText, spaces: spaces)
         }
         
     }
@@ -107,6 +113,25 @@ class ElementGenerator {
             \(insertingText)
             \(spacesString)}
 
+            """
+    }
+    
+    private func generateRootView(insertingText: String = "", spaces: Int) -> String {
+        let spacesString = String(repeating: " ", count: spaces)
+        return
+            """
+            \(spacesString)var body: some View {
+            \(insertingText)
+            \(spacesString)}
+
+            """
+    }
+    
+    private func skipElment(insertingText: String = "", spaces: Int) -> String {
+        let spacesString = String(repeating: " ", count: spaces)
+        return
+            """
+            \(spacesString)\(insertingText)
             """
     }
     
@@ -230,9 +255,7 @@ class ElementGenerator {
             import SwiftUI
 
             struct \(fileName): View {
-                var body: some View {
-                    \(completion())
-                }
+                \(completion())
             }
 
             struct \(fileName)_Previews: PreviewProvider {

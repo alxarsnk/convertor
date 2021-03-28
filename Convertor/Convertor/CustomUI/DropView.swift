@@ -16,7 +16,7 @@ class DropView: NSView {
     weak var delegate: DropViewDelegate?
     
     var filePath: String?
-    let expectedExt = ["storyboard"]
+    let expectedExt = ["storyboard", "xib"]
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -66,4 +66,5 @@ class DropView: NSView {
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         return delegate?.performDragOperation(sender) ?? true
     }
+    
 }

@@ -9,6 +9,11 @@ import Cocoa
 import XMLCoder
 import SwiftyXML
 
+enum ViewType {
+    case storyboard
+    case xml
+}
+
 class ViewController: NSViewController, DropViewDelegate {
     
     @IBOutlet weak var leftDropView: DropView!
@@ -91,30 +96,6 @@ class ViewController: NSViewController, DropViewDelegate {
     var depthIndent: String {
         return [String](repeating: "  ", count: self.depth).joined()
     }
-    var views: [String] = [
-        "viewController",
-        "view",
-        "subviews",
-        "tableView",
-        "tableViewCell",
-        "tableViewCellContentView",
-        "imageView",
-        "label",
-        "rect",
-        "color",
-        "constraints",
-        "button",
-        "contentMode",
-        "segmentedControl",
-        "switch",
-        "textField",
-        "textView",
-        "activityIndicatorView",
-        "pageControl",
-        "collectionView",
-        "collectionViewCell",
-        "stackView"
-    ]
 
     // MARK: - Драг'n'дроп делегат
     
@@ -156,9 +137,11 @@ class ViewController: NSViewController, DropViewDelegate {
     
     private func beginParsing() -> String {
         let xml = XML(string: sourceCode, encoding: .utf8)
-        getXmlChildrens(for: xml.scenes.scene.objects.viewController.view.subviews.xml!, level: 0, rootId: nil)
+        let elementType: ViewType = xml.scenes.xml == nil ? .xml : .storyboard
+        guard let soucrseXML = xml.scenes.xml ?? xml.objects.xml else { return "Error" }
+        getXmlChildrens(for: soucrseXML, level: 0, rootId: nil)
         print(
-            generateSwiftUIStruct(with: 0, rootId: nil)
+            generateSwiftUIStruct(with: 0, rootId: nil, elementType: elementType)
                 .trimmingCharacters(in: .whitespacesAndNewlines)
                 .components(separatedBy: .newlines)
                 .filter{!$0.isEmpty}.joined(separator: "\n")
@@ -185,6 +168,12 @@ class ViewController: NSViewController, DropViewDelegate {
             } else if children.xmlName == "view" || children.xmlName == "stackView" {
                 let id = getInfoAboutXML(children, level: level, rootId: rootId)
                 getXmlChildrens(for: children.subviews.xml!, level: level + 1, rootId: id)
+            } else if children.xmlName == "scene" {
+                let id = getInfoAboutXML(children, level: level, rootId: rootId)
+                getXmlChildrens(for: children.objects.xml!, level: level + 1, rootId: id)
+            } else if children.xmlName == "viewController" {
+                let id = getInfoAboutXML(children, level: level, rootId: rootId)
+                getXmlChildrens(for: children.view.subviews.xml!, level: level + 1, rootId: id)
             } else {
                 getInfoAboutXML(children, level: level, rootId: rootId)
             }
@@ -200,7 +189,7 @@ class ViewController: NSViewController, DropViewDelegate {
     
     // MARK: - Рекурсивно пройтись по моделям и сгенировать SwiftUI структуру
     
-    func generateSwiftUIStruct(with nestedIndex: Int, rootId: UUID?) -> String {
+    func generateSwiftUIStruct(with nestedIndex: Int, rootId: UUID?, elementType: ViewType) -> String {
         while nestedIndex <= models.count - 1 {
             var result = ""
             var filteredArray = StagedModels()
@@ -213,8 +202,13 @@ class ViewController: NSViewController, DropViewDelegate {
                 result.append(
                     ElementGenerator.shared.generateElement(
                         from: element.xml,
-                        insertingText: generateSwiftUIStruct(with: nestedIndex + 1, rootId: element.id),
-                        spaces: element.level
+                        insertingText: generateSwiftUIStruct(
+                            with: nestedIndex + 1,
+                            rootId: element.id,
+                            elementType: elementType
+                        ),
+                        spaces: element.level,
+                        elementType: elementType
                     )
                 )
             })
