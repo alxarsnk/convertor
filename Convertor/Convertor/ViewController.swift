@@ -136,6 +136,7 @@ class ViewController: NSViewController, DropViewDelegate {
                                 handlePath(path: $0.path)
                             }
                         self.convertProject()
+                        self.replaceFiles()
                     }
                 }
             }
@@ -163,6 +164,17 @@ class ViewController: NSViewController, DropViewDelegate {
         }.first!
         try! ElementGenerator.shared.createSceneDelegate(nameOfFile: String(initialVCURL.lastPathComponent.dropLast(11)))
             .write(toFile: sceneDelagtePath, atomically: true, encoding: .utf8)
+    }
+    
+    private func replaceFiles() {
+        contentsFile.forEach {
+            
+            var newURL = URL(string: $0.key)!
+            newURL.deletePathExtension()
+            newURL = newURL.appendingPathExtension("swift")
+            try! $0.value.write(toFile: newURL.path, atomically: true, encoding: .utf8)
+            try! FileManager.default.removeItem(at: URL(fileURLWithPath:  $0.key))
+        }
     }
     
     private func setupCOnvertedReadyState() {
