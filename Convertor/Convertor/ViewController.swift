@@ -135,13 +135,34 @@ class ViewController: NSViewController, DropViewDelegate {
                                 print($0.path)
                                 handlePath(path: $0.path)
                             }
-                        print(contentsFile)
+                        self.convertProject()
                     }
                 }
             }
         } else {
             return
         }
+    }
+    
+    private func convertProject() {
+        let infoPlistPath = filesInProjects.filter {
+            ($0.lastPathComponent.contains("Info.plist"))
+        }.first!.path
+        
+        var dict = NSMutableDictionary(contentsOfFile: infoPlistPath)
+        (((dict!["UIApplicationSceneManifest"] as! NSMutableDictionary)["UISceneConfigurations"] as! NSMutableDictionary)["UIWindowSceneSessionRoleApplication"] as! [NSMutableDictionary]).first!["UISceneStoryboardFile"] = nil
+        dict!["UIMainStoryboardFile"] = nil
+        dict?.write(toFile: infoPlistPath, atomically: true)
+        
+        let sceneDelagtePath = filesInProjects.filter {
+            ($0.lastPathComponent.contains("SceneDelegate.swift"))
+        }.first!.path
+        
+        let initialVCURL = filesInProjects.filter {
+            ($0.lastPathComponent.contains(".storyboard") && !$0.lastPathComponent.contains("LaunchScreen"))
+        }.first!
+        try! ElementGenerator.shared.createSceneDelegate(nameOfFile: String(initialVCURL.lastPathComponent.dropLast(11)))
+            .write(toFile: sceneDelagtePath, atomically: true, encoding: .utf8)
     }
     
     private func setupCOnvertedReadyState() {
