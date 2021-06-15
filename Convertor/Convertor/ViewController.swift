@@ -11,7 +11,7 @@ import SwiftyXML
 
 enum ViewType {
     case storyboard
-    case xml
+    case xib
 }
 
 class ViewController: NSViewController, DropViewDelegate {
@@ -23,12 +23,17 @@ class ViewController: NSViewController, DropViewDelegate {
     @IBOutlet weak var rightLabel: NSTextField!
     
     @IBOutlet weak var saveButton: NSButton!
+    @IBOutlet weak var chooseProjectButton: NSButton!
     
     private var fileText = ""
     private var sourceCode = ""
     private var fileURL: URL?
     private var parsedText = ""
     private var models: StagedModels = []
+    private var filesInProjects: [URL] = []
+    private var isProject = false
+    private var projectSourceURL: URL?
+    private var contentsFile: [String: String] = [:]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,22 +65,82 @@ class ViewController: NSViewController, DropViewDelegate {
     }
     
     private func saveButtonPressed() {
-        let savePanel = NSSavePanel()
-        savePanel.canCreateDirectories = true
-        savePanel.showsTagField = true
-        savePanel.allowedFileTypes = ["swift"]
-        savePanel.allowsOtherFileTypes = false
-        savePanel.nameFieldStringValue = "generated"
-        savePanel.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.modalPanelWindow)))
-        savePanel.begin { (result) in
-            if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
-                let filename = savePanel.url
-                do {
-                    try self.fileText.write(to: filename!, atomically: true, encoding: String.Encoding.utf8)
-                } catch let error {
-                    print("error: \(error)")
+        if !isProject {
+            let savePanel = NSSavePanel()
+            savePanel.canCreateDirectories = true
+            savePanel.showsTagField = true
+            savePanel.allowedFileTypes = ["swift"]
+            savePanel.allowsOtherFileTypes = false
+            savePanel.nameFieldStringValue = "generated"
+            savePanel.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.modalPanelWindow)))
+            savePanel.begin { (result) in
+                if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
+                    let filename = savePanel.url
+                    do {
+                        try self.fileText.write(to: filename!, atomically: true, encoding: String.Encoding.utf8)
+                    } catch let error {
+                        print("error: \(error)")
+                    }
                 }
             }
+        } else {
+           print("Saved")
+        }
+    }
+    
+    private func chooseProjectButtonPressed() {
+        let dialog = NSOpenPanel();
+
+        dialog.title = "Choose a file| Our Code World";
+        dialog.showsResizeIndicator = true
+        dialog.showsHiddenFiles = false
+        dialog.allowsMultipleSelection = false
+        dialog.canChooseDirectories = true
+
+        if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
+            let result = dialog.url
+            if (result != nil) {
+                projectSourceURL = result
+                let savePanel = NSSavePanel()
+                savePanel.canCreateDirectories = true
+                savePanel.showsTagField = true
+                savePanel.nameFieldStringValue = "SwiftUIProject"
+                savePanel.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.modalPanelWindow)))
+                savePanel.begin { [self] (saveResult) in
+                    if saveResult.rawValue == NSApplication.ModalResponse.OK.rawValue {
+                        let filename = savePanel.url
+                        do {
+                            try FileManager.default.copyItem(atPath: projectSourceURL!.path, toPath: filename!.path)
+                            
+                        } catch let error {
+                            print("error: \(error)")
+                        }
+                        let enumerator = FileManager.default.enumerator(at: filename!, includingPropertiesForKeys: [.isRegularFileKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
+                        for case let fileURL as URL in enumerator! {
+                            do {
+                                let fileAttributes = try fileURL.resourceValues(forKeys:[.isRegularFileKey])
+                                if fileAttributes.isRegularFile! {
+                                    filesInProjects.append(fileURL)
+                                }
+                            } catch { print(error, fileURL) }
+                        }
+                        isProject = true
+                        
+                        filesInProjects
+                            .filter {
+                                ($0.lastPathComponent.contains(".xib")  || $0.lastPathComponent.contains(".storyboard"))
+                                    && !$0.lastPathComponent.contains("LaunchScreen")
+                            }
+                            .forEach {
+                                print($0.path)
+                                handlePath(path: $0.path)
+                            }
+                        print(contentsFile)
+                    }
+                }
+            }
+        } else {
+            return
         }
     }
     
@@ -92,18 +157,19 @@ class ViewController: NSViewController, DropViewDelegate {
         saveButtonPressed()
     }
     
+    @IBAction func chooseProjectButtonTapped(_ sender: Any) {
+        chooseProjectButtonPressed()
+    }
+    
     var depth = 0
     var depthIndent: String {
         return [String](repeating: "  ", count: self.depth).joined()
     }
-
-    // MARK: - Драг'n'дроп делегат
     
-    func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        guard let pasteboard = sender.draggingPasteboard.propertyList(forType: NSPasteboard.PasteboardType(rawValue: "NSFilenamesPboardType")) as? NSArray,
-              let path = pasteboard[0] as? String,
-              let url = URL(string: path)
-        else { return false }
+    func handlePath(path: String) {
+        fileText = ""
+        sourceCode = ""
+        guard let url = URL(string: path) else { return }
         fileURL = url
         leftLabel.stringValue = url.lastPathComponent
         let imageView = NSImageView(frame: leftDropView.frame)
@@ -128,25 +194,33 @@ class ViewController: NSViewController, DropViewDelegate {
         fileText.append(
             ElementGenerator.shared.generateTemplate(
                 fileName: String(url.lastPathComponent.dropLast(11)), completion: {
-                    beginParsing()
+                    return beginParsing()
                 }
             )
         )
+        contentsFile[path] = fileText
+    }
+
+    // MARK: - Драг'n'дроп делегат
+    
+    func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let pasteboard = sender.draggingPasteboard.propertyList(forType: NSPasteboard.PasteboardType(rawValue: "NSFilenamesPboardType")) as? NSArray,
+              let path = pasteboard[0] as? String
+        else { return false }
+        handlePath(path: path)
         return true
     }
     
     private func beginParsing() -> String {
         let xml = XML(string: sourceCode, encoding: .utf8)
-        let elementType: ViewType = xml.scenes.xml == nil ? .xml : .storyboard
+        let elementType: ViewType = xml.scenes.xml == nil ? .xib : .storyboard
         guard let soucrseXML = xml.scenes.xml ?? xml.objects.xml else { return "Error" }
         getXmlChildrens(for: soucrseXML, level: 0, rootId: nil)
-        print(
+        return
             generateSwiftUIStruct(with: 0, rootId: nil, elementType: elementType)
                 .trimmingCharacters(in: .whitespacesAndNewlines)
                 .components(separatedBy: .newlines)
                 .filter{!$0.isEmpty}.joined(separator: "\n")
-        )
-        return "Text(\"Parsing\")"
     }
     
     // MARK: - Рекрурсивно пройтись по XML файлу и сгенирировать промежутчоные модели
@@ -183,6 +257,9 @@ class ViewController: NSViewController, DropViewDelegate {
     func getInfoAboutXML(_ xml: XML, level: Int, rootId: UUID?) -> UUID {
         let model = StagedModel(xml: xml, level: level, rootId: rootId)
         models.append(model)
+        if xml.customClass != nil {
+//            print(xml.customClass!)
+        }
         return model.id
     }
     

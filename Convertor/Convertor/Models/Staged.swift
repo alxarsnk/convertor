@@ -26,3 +26,31 @@ class StagedModel {
         return "Name: \(xml.xmlName) level: \(level)"//, id: \(id), rootId: \(rootId)"
     }
 }
+
+extension XML {
+    
+    var rect: CGRect? {
+        get {
+            if let rect = self.xmlChildren.first(where: {$0.xmlName == "rect"}),
+               let x = Double(rect.xmlAttributes["x"] ?? ""),
+               let y = Double(rect.xmlAttributes["y"] ?? ""),
+               let width = Double(rect.xmlAttributes["width"] ?? ""),
+               let height = Double(rect.xmlAttributes["height"] ?? "") {
+                return CGRect(x: x, y: y, width: width, height: height)
+            } else {
+                return nil
+            }
+        }
+    }
+    
+    var customClass: String? {
+        get {
+            if let customClass = self.xmlAttributes.first(where: {$0.key == "customClass"}) {
+                return customClass.value
+            } else {
+                return nil
+            }
+        }
+    }
+    
+}

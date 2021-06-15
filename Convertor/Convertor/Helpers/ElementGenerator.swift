@@ -32,7 +32,7 @@ class ElementGenerator {
         case .tableViewCell:
             return generateVStack(insertingText: insertingText, spaces: spaces)
         case .view:
-            if elementType == .xml && spaces == 0 {
+            if elementType == .xib && spaces == 0 {
                 return generateRootView(insertingText: insertingText, spaces: spaces)
             } else {
                 return generateVStack(insertingText: insertingText, spaces: spaces)
@@ -250,7 +250,7 @@ class ElementGenerator {
             """
     }
     
-    func generateTemplate(fileName: String, completion: (() -> Void)) -> String {
+    func generateTemplate(fileName: String, completion: (() -> String)) -> String {
         return """
             import SwiftUI
 
