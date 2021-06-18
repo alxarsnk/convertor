@@ -15,6 +15,14 @@ class ElementGenerator {
     private var isActivityViewAdded = false
     private var isPageCotnrolAdded = false
     private var isTextViewAdded = false
+    private var isBodyExists = false
+    
+    func clearData() {
+        isActivityViewAdded = false
+        isPageCotnrolAdded = false
+        isTextViewAdded = false
+        isBodyExists = false
+    }
     
     private var customElements = ""
     
@@ -33,7 +41,7 @@ class ElementGenerator {
             return generateVStack(insertingText: insertingText, spaces: spaces)
         case .view:
             if elementType == .xib && spaces == 0 {
-                return generateRootView(insertingText: insertingText, spaces: spaces)
+                return generateRootView(insertingText: insertingText, spaces: spaces, xml: xml)
             } else {
                 return generateVStack(insertingText: insertingText, spaces: spaces)
             }
@@ -63,7 +71,7 @@ class ElementGenerator {
         case .collectionViewCell:
             return generateHStack(insertingText: insertingText, spaces: spaces)
         case .viewController:
-            return generateRootView(insertingText: insertingText, spaces: spaces)
+            return generateRootView(insertingText: insertingText, spaces: spaces, xml: xml)
         }
         
     }
@@ -116,11 +124,13 @@ class ElementGenerator {
             """
     }
     
-    private func generateRootView(insertingText: String = "", spaces: Int) -> String {
+    private func generateRootView(insertingText: String = "", spaces: Int, xml: XML) -> String {
+        let title = isBodyExists ? xml.xmlName : "body"
         let spacesString = String(repeating: " ", count: spaces)
+        isBodyExists = true
         return
             """
-            \(spacesString)var body: some View {
+            \(spacesString)var \(title): some View {
             \(insertingText)
             \(spacesString)}
 
@@ -157,7 +167,7 @@ class ElementGenerator {
         }
         return
             """
-            \(spacesString)Image()\(text)
+            \(spacesString)Image(uiImage: UIImage())\(text)
 
             """
     }
@@ -167,7 +177,10 @@ class ElementGenerator {
         let text = insertingText
         return
             """
-            \(spacesString)Button()\(text)
+            \(spacesString)Button(action: {}) {
+            \(spacesString) Text("Button")
+            \(text)
+            }
 
             """
     }
@@ -415,4 +428,63 @@ class ElementGenerator {
         """
     }
     
+    func createDebugFile(name: String) -> String {
+        var res = ""
+        res.append(generateHeader(fileName: name))
+        res.append(generateTemplate(fileName: name, completion: { () -> String in
+            return """
+            let dataSource: [User] = Array.init(repeating: User(), count: 15)
+            
+            @State private var text = Text("Name")
+            
+            var body: some View {
+                TabView {
+                    NavigationView {
+                        List(dataSource) { model in
+                            VStack(alignment: .leading) {
+                                Image(uiImage: model.postImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .cornerRadius(8)
+                                Spacer().frame(width: 0, height: 12, alignment: .bottom)
+                                HStack {
+                                    Image(uiImage: model.avatarImage)
+                                        .resizable()
+                                        .frame(width: 48, height: 48, alignment: .leading)
+                                        .cornerRadius(24)
+                                        .aspectRatio(contentMode: .fill)
+                                    text
+                                    Spacer(minLength: 20)
+                                    Button(action: {
+                                        model.isLiked = !model.isLiked
+                                    }) {
+                                        Image(model.isLiked ? "isLiked" : "notLiked")
+                                            .resizable()
+                                            .frame(width: 24, height: 24, alignment: .trailing)
+                                    }
+                                    Image("arrow")
+                                        .resizable()
+                                        .frame(width: 24, height: 24, alignment: .leading)
+                                }
+                            }
+                            .background(Color(red: 0.9, green: 0.9, blue: 0.9))
+                            .cornerRadius(12)
+                            .padding(EdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4))
+                        }
+                        .navigationBarTitle("News")
+                    }.tabItem {
+                        Image(systemName: "star.fill")
+                        Text("Favourite")
+                    }
+                    Text("The content of the second view")
+                        .tabItem {
+                            Image(systemName: "clock.fill")
+                            Text("History")
+                        }
+                }
+            }
+            """
+        }))
+        return res
+    }
 }

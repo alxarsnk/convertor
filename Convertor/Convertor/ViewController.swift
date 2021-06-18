@@ -8,6 +8,8 @@
 import Cocoa
 import XMLCoder
 import SwiftyXML
+import XcodeProj
+import PathKit
 
 enum ViewType {
     case storyboard
@@ -18,6 +20,8 @@ class ViewController: NSViewController, DropViewDelegate {
     
     @IBOutlet weak var leftDropView: DropView!
     @IBOutlet weak var leftLabel: NSTextField!
+    @IBOutlet weak var leftImageView: NSImageView!
+    @IBOutlet weak var rightImageView: NSImageView!
     
     @IBOutlet weak var rightDropView: NSView!
     @IBOutlet weak var rightLabel: NSTextField!
@@ -28,7 +32,6 @@ class ViewController: NSViewController, DropViewDelegate {
     private var fileText = ""
     private var sourceCode = ""
     private var fileURL: URL?
-    private var parsedText = ""
     private var models: StagedModels = []
     private var filesInProjects: [URL] = []
     private var isProject = false
@@ -40,6 +43,7 @@ class ViewController: NSViewController, DropViewDelegate {
         setupLabels()
         setupDropViews()
         saveButton.title = "Save"
+        saveButton.isHidden = true
         saveButton.contentTintColor = .white
         saveButton.layer?.backgroundColor = #colorLiteral(red: 0.2196078449, green: 0.007843137719, blue: 0.8549019694, alpha: 1)
         saveButton.isHidden = true
@@ -51,6 +55,7 @@ class ViewController: NSViewController, DropViewDelegate {
         }
     }
     
+    
     // MARK: - Настройить UI
     
     private func setupLabels() {
@@ -61,7 +66,15 @@ class ViewController: NSViewController, DropViewDelegate {
     private func setupDropViews() {
         rightDropView.wantsLayer = true
         rightDropView.layer?.backgroundColor = NSColor.gray.cgColor
+        leftDropView.layer?.backgroundColor = .clear
+        rightDropView.layer?.backgroundColor = .clear
         leftDropView.delegate = self
+        rightDropView.layer?.cornerRadius = 16
+        leftDropView.layer?.cornerRadius = 16
+        rightDropView.layer?.borderWidth = 1
+        leftDropView.layer?.borderWidth = 1
+        rightDropView.layer?.borderColor = NSColor.lightGray.cgColor
+        leftDropView.layer?.borderColor = NSColor.lightGray.cgColor
     }
     
     private func saveButtonPressed() {
@@ -91,7 +104,7 @@ class ViewController: NSViewController, DropViewDelegate {
     private func chooseProjectButtonPressed() {
         let dialog = NSOpenPanel();
 
-        dialog.title = "Choose a file| Our Code World";
+        dialog.title = "Choose a file or project";
         dialog.showsResizeIndicator = true
         dialog.showsHiddenFiles = false
         dialog.allowsMultipleSelection = false
@@ -162,13 +175,20 @@ class ViewController: NSViewController, DropViewDelegate {
         let initialVCURL = filesInProjects.filter {
             ($0.lastPathComponent.contains(".storyboard") && !$0.lastPathComponent.contains("LaunchScreen"))
         }.first!
-        try! ElementGenerator.shared.createSceneDelegate(nameOfFile: String(initialVCURL.lastPathComponent.dropLast(11)))
+        var fileName = String(
+            String(
+                initialVCURL.lastPathComponent.reversed()
+            )
+            .drop(while: {$0 != "."})
+            .reversed()
+            .dropLast())
+        fileName = "New"+fileName
+        try! ElementGenerator.shared.createSceneDelegate(nameOfFile: fileName)
             .write(toFile: sceneDelagtePath, atomically: true, encoding: .utf8)
     }
     
     private func replaceFiles() {
         contentsFile.forEach {
-            
             var newURL = URL(string: $0.key)!
             newURL.deletePathExtension()
             newURL = newURL.appendingPathExtension("swift")
@@ -179,11 +199,10 @@ class ViewController: NSViewController, DropViewDelegate {
     
     private func setupCOnvertedReadyState() {
         rightLabel.isHidden = true
-        saveButton.isHidden = false
-        let imageView = NSImageView(frame: leftDropView.frame)
-        imageView.image = #imageLiteral(resourceName: "swiftFIleIcon")
-        imageView.imageAlignment = .alignCenter
-        rightDropView.addSubview(imageView)
+        leftImageView.image = #imageLiteral(resourceName: "swiftFIleIcon")
+        leftImageView.imageAlignment = .alignCenter
+        rightImageView.image = #imageLiteral(resourceName: "storyboardFileIcon")
+        rightImageView.imageAlignment = .alignCenter
     }
     
     @IBAction func saveButtonPressed(_ sender: Any) {
@@ -200,15 +219,12 @@ class ViewController: NSViewController, DropViewDelegate {
     }
     
     func handlePath(path: String) {
+        ElementGenerator.shared.clearData()
         fileText = ""
         sourceCode = ""
         guard let url = URL(string: path) else { return }
         fileURL = url
         leftLabel.stringValue = url.lastPathComponent
-        let imageView = NSImageView(frame: leftDropView.frame)
-        imageView.image = #imageLiteral(resourceName: "storyboardFileIcon")
-        imageView.imageAlignment = .alignCenter
-        leftDropView.addSubview(imageView)
         if let aStreamReader = StreamReader(path: path) {
             defer {
                 aStreamReader.close()
@@ -218,19 +234,34 @@ class ViewController: NSViewController, DropViewDelegate {
             }
             setupCOnvertedReadyState()
         }
-        fileText.append(
-            ElementGenerator.shared.generateHeader(
-                fileName: String(url.lastPathComponent.dropLast(11))
+        var fileName = String(
+            String(
+                url.lastPathComponent.reversed()
             )
-        )
-        
-        fileText.append(
-            ElementGenerator.shared.generateTemplate(
-                fileName: String(url.lastPathComponent.dropLast(11)), completion: {
-                    return beginParsing()
-                }
+            .drop(while: {$0 != "."})
+            .reversed()
+            .dropLast())
+        fileName = "New"+fileName
+        if fileName.contains("Main") {
+            fileText.append(
+                ElementGenerator.shared.createDebugFile(name: fileName)
             )
-        )
+        } else {
+            fileText.append(
+                ElementGenerator.shared.generateHeader(
+                    fileName: fileName
+                )
+            )
+            
+            fileText.append(
+                ElementGenerator.shared.generateTemplate(
+                    fileName: fileName, completion: {
+                        models = []
+                        return beginParsing()
+                    }
+                )
+            )
+        }
         contentsFile[path] = fileText
     }
 

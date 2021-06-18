@@ -710,6 +710,26 @@
                         <rect key="frame" x="0.0" y="0.0" width="710" height="754"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="Scv-w4-xxd" customClass="NSGradientView" customModule="NSGradientView">
+                                <rect key="frame" x="0.0" y="0.0" width="710" height="754"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="color" keyPath="startColor">
+                                        <color key="value" name="systemPinkColor" catalog="System" colorSpace="catalog"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="color" keyPath="endColor">
+                                        <color key="value" name="systemTealColor" catalog="System" colorSpace="catalog"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="rotation">
+                                        <real key="value" value="45"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="endPosition">
+                                        <real key="value" value="1"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="startPosition">
+                                        <real key="value" value="0.0"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="mUr-bv-suY">
                                 <rect key="frame" x="193" y="195" width="324" height="364"/>
                                 <subviews>
@@ -723,16 +743,40 @@
                                     </textField>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="ZDm-Ia-RUG" customClass="DropView" customModule="Convertor" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="76" width="144" height="288"/>
+                                        <subviews>
+                                            <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="XW1-eO-W3t">
+                                                <rect key="frame" x="48" y="120" width="48" height="48"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="width" constant="48" id="9ad-Qr-aP4"/>
+                                                    <constraint firstAttribute="height" constant="48" id="LXk-Zf-7Mc"/>
+                                                </constraints>
+                                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="Oj7-pG-PvX"/>
+                                            </imageView>
+                                        </subviews>
                                         <constraints>
+                                            <constraint firstItem="XW1-eO-W3t" firstAttribute="centerY" secondItem="ZDm-Ia-RUG" secondAttribute="centerY" id="0bf-v9-l5D"/>
                                             <constraint firstAttribute="height" constant="288" id="aJF-Ez-8xV"/>
+                                            <constraint firstItem="XW1-eO-W3t" firstAttribute="centerX" secondItem="ZDm-Ia-RUG" secondAttribute="centerX" id="tdh-Cl-rK6"/>
                                             <constraint firstAttribute="width" constant="144" id="za7-yb-yiE"/>
                                         </constraints>
                                     </customView>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="fUA-q4-634">
                                         <rect key="frame" x="180" y="76" width="144" height="288"/>
+                                        <subviews>
+                                            <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="mDz-Nf-aBt">
+                                                <rect key="frame" x="36" y="108" width="72" height="72"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="72" id="c4o-JL-eGR"/>
+                                                    <constraint firstAttribute="width" constant="72" id="wqN-Vi-e4r"/>
+                                                </constraints>
+                                                <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="Iwu-rF-ZwC"/>
+                                            </imageView>
+                                        </subviews>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="144" id="51t-Rn-6n3"/>
                                             <constraint firstAttribute="height" constant="288" id="JSZ-hQ-KEh"/>
+                                            <constraint firstItem="mDz-Nf-aBt" firstAttribute="centerY" secondItem="fUA-q4-634" secondAttribute="centerY" id="cec-rF-xci"/>
+                                            <constraint firstItem="mDz-Nf-aBt" firstAttribute="centerX" secondItem="fUA-q4-634" secondAttribute="centerX" id="rAI-Et-Sep"/>
                                         </constraints>
                                     </customView>
                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="0Cf-QX-iSm">
@@ -790,16 +834,22 @@
                         </subviews>
                         <constraints>
                             <constraint firstItem="mUr-bv-suY" firstAttribute="centerY" secondItem="m2S-Jp-Qdl" secondAttribute="centerY" id="3fo-iq-2Os"/>
+                            <constraint firstItem="Scv-w4-xxd" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="7Le-y5-oXD"/>
+                            <constraint firstAttribute="trailing" secondItem="Scv-w4-xxd" secondAttribute="trailing" id="KUU-4Z-YZN"/>
+                            <constraint firstItem="Scv-w4-xxd" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="W71-NJ-hsf"/>
                             <constraint firstItem="mUr-bv-suY" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="fAS-Io-J4S"/>
                             <constraint firstItem="mUr-bv-suY" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="36" id="nzi-hh-487"/>
                             <constraint firstItem="mUr-bv-suY" firstAttribute="top" relation="greaterThanOrEqual" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="36" id="oP2-1A-Axy"/>
+                            <constraint firstAttribute="bottom" secondItem="Scv-w4-xxd" secondAttribute="bottom" id="v2E-r2-Qbn"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="chooseProjectButton" destination="mnb-OU-rZv" id="mjV-0E-PP6"/>
                         <outlet property="leftDropView" destination="ZDm-Ia-RUG" id="VMa-kq-IBR"/>
+                        <outlet property="leftImageView" destination="XW1-eO-W3t" id="S17-Rr-Rd2"/>
                         <outlet property="leftLabel" destination="0Cf-QX-iSm" id="WIk-p8-2fk"/>
                         <outlet property="rightDropView" destination="fUA-q4-634" id="zVh-i2-WhL"/>
+                        <outlet property="rightImageView" destination="mDz-Nf-aBt" id="dbk-Jd-RAJ"/>
                         <outlet property="rightLabel" destination="ahM-NE-DAx" id="gyn-EJ-HsQ"/>
                         <outlet property="saveButton" destination="SEp-v3-iqT" id="WV7-FW-TgD"/>
                     </connections>

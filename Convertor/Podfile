@@ -8,4 +8,6 @@ target 'Convertor' do
   # Pods for Convertor
   pod 'XMLCoder'
   pod 'SwiftyXML'
+  pod 'xcodeproj', '~> 7.19.0'
+  pod 'NSGradientView'
 end

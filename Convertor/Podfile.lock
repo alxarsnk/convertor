@@ -1,20 +1,36 @@
 PODS:
+  - AEXML (4.6.0)
+  - NSGradientView (0.0.1)
+  - PathKit (1.0.0)
   - SwiftyXML (3.1.0)
+  - xcodeproj (7.19.0):
+    - AEXML (~> 4.6.0)
+    - PathKit (~> 1.0.0)
   - XMLCoder (0.11.1)
 
 DEPENDENCIES:
+  - NSGradientView
   - SwiftyXML
+  - xcodeproj (~> 7.19.0)
   - XMLCoder
 
 SPEC REPOS:
   trunk:
+    - AEXML
+    - NSGradientView
+    - PathKit
     - SwiftyXML
+    - xcodeproj
     - XMLCoder
 
 SPEC CHECKSUMS:
+  AEXML: 2fbb73d8724797ed2cde888731e176fa4d44dd83
+  NSGradientView: 221211f3b39b034e54f8faf95273e0060a55338b
+  PathKit: 364e0de7fb5adb142aecab4e112187e5548fc4b6
   SwiftyXML: 1ea095c1416039db95cb050f0a34559b061ede93
+  xcodeproj: ec17df7f66388e9441667fa8d34c38b6def62b87
   XMLCoder: c4638336674de7ba279cd23f2005817d69f538e0
 
-PODFILE CHECKSUM: 5474aaf86a777d8b2c7192f7d4b528aeccec23a5
+PODFILE CHECKSUM: a2669aafc0ff2d2c901f5f6113076267018b4399
 
-COCOAPODS: 1.9.3
+COCOAPODS: 1.10.1
