@@ -23,6 +23,7 @@ class ViewController: NSViewController, DropViewDelegate {
     @IBOutlet weak var leftImageView: NSImageView!
     @IBOutlet weak var rightImageView: NSImageView!
     
+    @IBOutlet weak var activityView: NSProgressIndicator!
     @IBOutlet weak var rightDropView: NSView!
     @IBOutlet weak var rightLabel: NSTextField!
     
@@ -30,6 +31,7 @@ class ViewController: NSViewController, DropViewDelegate {
     @IBOutlet weak var chooseProjectButton: NSButton!
     
     private var fileText = ""
+    private var fileName = ""
     private var sourceCode = ""
     private var fileURL: URL?
     private var models: StagedModels = []
@@ -37,6 +39,7 @@ class ViewController: NSViewController, DropViewDelegate {
     private var isProject = false
     private var projectSourceURL: URL?
     private var contentsFile: [String: String] = [:]
+    private var newPath: String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,6 +50,7 @@ class ViewController: NSViewController, DropViewDelegate {
         saveButton.contentTintColor = .white
         saveButton.layer?.backgroundColor = #colorLiteral(red: 0.2196078449, green: 0.007843137719, blue: 0.8549019694, alpha: 1)
         saveButton.isHidden = true
+        activityView.isHidden = true
     }
     
     override var representedObject: Any? {
@@ -84,7 +88,7 @@ class ViewController: NSViewController, DropViewDelegate {
             savePanel.showsTagField = true
             savePanel.allowedFileTypes = ["swift"]
             savePanel.allowsOtherFileTypes = false
-            savePanel.nameFieldStringValue = "generated"
+            savePanel.nameFieldStringValue = fileName
             savePanel.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.modalPanelWindow)))
             savePanel.begin { (result) in
                 if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
@@ -138,7 +142,7 @@ class ViewController: NSViewController, DropViewDelegate {
                             } catch { print(error, fileURL) }
                         }
                         isProject = true
-                        
+                        newPath = savePanel.url?.path ?? ""
                         filesInProjects
                             .filter {
                                 ($0.lastPathComponent.contains(".xib")  || $0.lastPathComponent.contains(".storyboard"))
@@ -188,21 +192,64 @@ class ViewController: NSViewController, DropViewDelegate {
     }
     
     private func replaceFiles() {
+        let files = Path(newPath)
+        let project = try? files.children().first(where: {$0.string.contains("xcodeproj")})
+        let projFilePath = project?.string.appending("/project.pbxproj") ?? ""
+        var projectText: String = ""
+        if let aStreamReader = StreamReader(path: projFilePath) {
+            defer {
+                aStreamReader.close()
+            }
+            while let line = aStreamReader.nextLine() {
+                projectText.append(line + "\n")
+            }
+        }
+        
         contentsFile.forEach {
+            var url = URL(string: $0.key)!
             var newURL = URL(string: $0.key)!
             newURL.deletePathExtension()
             newURL = newURL.appendingPathExtension("swift")
+            let currFileName = url.lastPathComponent
+            
+            projectText = projectText.replacingOccurrences(
+                of: "\(currFileName) in Resources",
+                with: "\(newURL.lastPathComponent) in Sources"
+            )
+            
+            projectText = projectText.replacingOccurrences(
+                of: "\(currFileName)",
+                with: "\(newURL.lastPathComponent)"
+            )
+            
+            projectText = projectText.replacingOccurrences(
+                of: "\(newURL.lastPathComponent) */ = {isa = PBXFileReference; lastKnownFileType = file.\(url.pathExtension);",
+                with: "\(newURL.lastPathComponent) */ = {isa = PBXFileReference; lastKnownFileType = file.swift;"
+            )
+            
+            projectText = projectText.replacingOccurrences(
+                of: "/* Base */ = {isa = PBXFileReference; lastKnownFileType = file.\(url.pathExtension); name = Base; path = Base.lproj/\(newURL.lastPathComponent);",
+                with: "/* Base */ = {isa = PBXFileReference; lastKnownFileType = file.swift; name = Base; path = Base.lproj/\(newURL.lastPathComponent);"
+            )
+            
+            // MARK: - Делим текст на строки
+            var lines = projectText.components(separatedBy: "\n")
+            let lineInResource = lines.enumerated().first(where: { $0.element.contains("\(newURL.lastPathComponent) in Sources */,") })
+            lines.remove(at: lineInResource?.offset ?? -1)
+            
+            let insertBaseOffset = lines.enumerated().first(where: { $0.element.contains("/* End PBXSourcesBuildPhase section */")})?.offset ?? -1
+            lines.insert(lineInResource?.element ?? "", at: insertBaseOffset - 4)
+            projectText = lines.joined(separator: "\n")
+            
             try! $0.value.write(toFile: newURL.path, atomically: true, encoding: .utf8)
             try! FileManager.default.removeItem(at: URL(fileURLWithPath:  $0.key))
         }
+        try! projectText.write(toFile: projFilePath, atomically: true, encoding: .utf8)
     }
     
     private func setupCOnvertedReadyState() {
-        rightLabel.isHidden = true
-        leftImageView.image = #imageLiteral(resourceName: "swiftFIleIcon")
+        leftImageView.image = #imageLiteral(resourceName: "storyboardFileIcon")
         leftImageView.imageAlignment = .alignCenter
-        rightImageView.image = #imageLiteral(resourceName: "storyboardFileIcon")
-        rightImageView.imageAlignment = .alignCenter
     }
     
     @IBAction func saveButtonPressed(_ sender: Any) {
@@ -242,11 +289,12 @@ class ViewController: NSViewController, DropViewDelegate {
             .reversed()
             .dropLast())
         fileName = "New"+fileName
-        if fileName.contains("Main") {
-            fileText.append(
-                ElementGenerator.shared.createDebugFile(name: fileName)
-            )
-        } else {
+        self.fileName = fileName + ".swift"
+//        if fileName.contains("Main") {
+//            fileText.append(
+//                ElementGenerator.shared.createDebugFile(name: fileName)
+//            )
+//        } else {
             fileText.append(
                 ElementGenerator.shared.generateHeader(
                     fileName: fileName
@@ -261,8 +309,18 @@ class ViewController: NSViewController, DropViewDelegate {
                     }
                 )
             )
-        }
+//        }
         contentsFile[path] = fileText
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            self?.activityView.stopAnimation(self)
+            self?.activityView.isHidden = true
+            self?.rightLabel.isHidden = true
+            self?.rightImageView.image = #imageLiteral(resourceName: "swiftFIleIcon")
+            self?.rightImageView.imageAlignment = .alignCenter
+            self?.saveButton.isHidden = false
+            self?.rightLabel.isHidden = false
+            self?.rightLabel.stringValue = self?.fileName ?? ""
+        }
     }
 
     // MARK: - Драг'n'дроп делегат
@@ -271,6 +329,8 @@ class ViewController: NSViewController, DropViewDelegate {
         guard let pasteboard = sender.draggingPasteboard.propertyList(forType: NSPasteboard.PasteboardType(rawValue: "NSFilenamesPboardType")) as? NSArray,
               let path = pasteboard[0] as? String
         else { return false }
+        activityView.isHidden = false
+        activityView.startAnimation(self)
         handlePath(path: path)
         return true
     }

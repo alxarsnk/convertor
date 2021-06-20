@@ -745,10 +745,10 @@
                                         <rect key="frame" x="0.0" y="76" width="144" height="288"/>
                                         <subviews>
                                             <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="XW1-eO-W3t">
-                                                <rect key="frame" x="48" y="120" width="48" height="48"/>
+                                                <rect key="frame" x="36" y="108" width="72" height="72"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="width" constant="48" id="9ad-Qr-aP4"/>
-                                                    <constraint firstAttribute="height" constant="48" id="LXk-Zf-7Mc"/>
+                                                    <constraint firstAttribute="width" constant="72" id="9ad-Qr-aP4"/>
+                                                    <constraint firstAttribute="height" constant="72" id="LXk-Zf-7Mc"/>
                                                 </constraints>
                                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="Oj7-pG-PvX"/>
                                             </imageView>
@@ -764,10 +764,10 @@
                                         <rect key="frame" x="180" y="76" width="144" height="288"/>
                                         <subviews>
                                             <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="mDz-Nf-aBt">
-                                                <rect key="frame" x="36" y="108" width="72" height="72"/>
+                                                <rect key="frame" x="48" y="120" width="48" height="48"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="height" constant="72" id="c4o-JL-eGR"/>
-                                                    <constraint firstAttribute="width" constant="72" id="wqN-Vi-e4r"/>
+                                                    <constraint firstAttribute="height" constant="48" id="c4o-JL-eGR"/>
+                                                    <constraint firstAttribute="width" constant="48" id="wqN-Vi-e4r"/>
                                                 </constraints>
                                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="Iwu-rF-ZwC"/>
                                             </imageView>
@@ -788,7 +788,7 @@
                                         </textFieldCell>
                                     </textField>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="SEp-v3-iqT">
-                                        <rect key="frame" x="211" y="36" width="83" height="33"/>
+                                        <rect key="frame" x="211" y="12" width="83" height="33"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="69" id="Mih-sW-Jro"/>
                                             <constraint firstAttribute="height" constant="21" id="mHe-m2-qzw"/>
@@ -811,20 +811,29 @@
                                             <action selector="chooseProjectButtonTapped:" target="XfG-lQ-9wD" id="v0S-VC-0Pi"/>
                                         </connections>
                                     </button>
+                                    <progressIndicator maxValue="100" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="PZb-Xn-AUU">
+                                        <rect key="frame" x="146" y="166" width="32" height="32"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="32" id="GWg-W3-xpP"/>
+                                            <constraint firstAttribute="height" constant="32" id="r9U-Dv-REq"/>
+                                        </constraints>
+                                    </progressIndicator>
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="mnb-OU-rZv" firstAttribute="leading" secondItem="mUr-bv-suY" secondAttribute="leading" constant="12" id="14K-WU-3LJ"/>
                                     <constraint firstItem="ZDm-Ia-RUG" firstAttribute="leading" secondItem="mUr-bv-suY" secondAttribute="leading" id="Cxc-XC-nhl"/>
                                     <constraint firstAttribute="bottom" secondItem="mnb-OU-rZv" secondAttribute="bottom" id="IZc-7C-8ve"/>
+                                    <constraint firstItem="PZb-Xn-AUU" firstAttribute="centerX" secondItem="mUr-bv-suY" secondAttribute="centerX" id="Jdh-jx-dUX"/>
                                     <constraint firstItem="ahM-NE-DAx" firstAttribute="leading" secondItem="fUA-q4-634" secondAttribute="leading" id="QgH-fs-Jqm"/>
                                     <constraint firstItem="ahM-NE-DAx" firstAttribute="top" secondItem="fUA-q4-634" secondAttribute="bottom" constant="12" id="R1i-sy-8pc"/>
-                                    <constraint firstItem="ahM-NE-DAx" firstAttribute="top" secondItem="SEp-v3-iqT" secondAttribute="top" id="T6z-bV-Xzw"/>
+                                    <constraint firstItem="ahM-NE-DAx" firstAttribute="top" secondItem="SEp-v3-iqT" secondAttribute="top" constant="-24" id="T6z-bV-Xzw"/>
                                     <constraint firstItem="mnb-OU-rZv" firstAttribute="top" secondItem="0Cf-QX-iSm" secondAttribute="bottom" constant="12" id="UJ6-z2-m23"/>
                                     <constraint firstItem="fUA-q4-634" firstAttribute="top" secondItem="mUr-bv-suY" secondAttribute="top" id="VXv-nb-IJD"/>
                                     <constraint firstItem="ahM-NE-DAx" firstAttribute="trailing" secondItem="fUA-q4-634" secondAttribute="trailing" id="aWL-6Z-Bkk"/>
                                     <constraint firstItem="0Cf-QX-iSm" firstAttribute="trailing" secondItem="ZDm-Ia-RUG" secondAttribute="trailing" id="csy-b3-HD2"/>
                                     <constraint firstItem="0Cf-QX-iSm" firstAttribute="leading" secondItem="ZDm-Ia-RUG" secondAttribute="leading" id="e7g-0k-7KE"/>
                                     <constraint firstItem="SEp-v3-iqT" firstAttribute="centerX" secondItem="ahM-NE-DAx" secondAttribute="centerX" id="gD6-Uo-Gsu"/>
+                                    <constraint firstItem="PZb-Xn-AUU" firstAttribute="centerY" secondItem="mUr-bv-suY" secondAttribute="centerY" id="mGx-wo-oLd"/>
                                     <constraint firstItem="0Cf-QX-iSm" firstAttribute="top" secondItem="ZDm-Ia-RUG" secondAttribute="bottom" constant="12" id="pVo-5c-Vy0"/>
                                     <constraint firstAttribute="trailing" secondItem="fUA-q4-634" secondAttribute="trailing" id="sBW-X9-W6o"/>
                                     <constraint firstItem="fUA-q4-634" firstAttribute="centerY" secondItem="ZDm-Ia-RUG" secondAttribute="centerY" id="u6E-YT-KhH"/>
@@ -844,6 +853,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="activityView" destination="PZb-Xn-AUU" id="AU5-ll-A7d"/>
                         <outlet property="chooseProjectButton" destination="mnb-OU-rZv" id="mjV-0E-PP6"/>
                         <outlet property="leftDropView" destination="ZDm-Ia-RUG" id="VMa-kq-IBR"/>
                         <outlet property="leftImageView" destination="XW1-eO-W3t" id="S17-Rr-Rd2"/>

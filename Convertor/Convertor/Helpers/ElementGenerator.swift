@@ -29,54 +29,54 @@ class ElementGenerator {
     private init() { }
     
     func generateElement(from xml: XML, insertingText: String, spaces: Int, elementType: ViewType) -> String {
-        guard let element = ElementType(rawValue: xml.xmlName) else { return skipElment(insertingText: insertingText, spaces: spaces) }
+        guard let element = ElementType(rawValue: xml.xmlName) else { return skipElment(insertingText: insertingText, spaces: spaces, xml: xml) }
         switch element {
         case .tableView:
-            return generateTableView(insertingText: insertingText, spaces: spaces)
+            return generateTableView(insertingText: insertingText, spaces: spaces, xml: xml)
         case .imageView:
-            return generateImageView(insertingText: insertingText, spaces: spaces, attributes: xml.xmlAttributes)
+            return generateImageView(insertingText: insertingText, spaces: spaces, xml: xml)
         case .label:
-            return generateLabel(insertingText: insertingText, spaces: spaces)
+            return generateLabel(insertingText: insertingText, spaces: spaces, xml: xml)
         case .tableViewCell:
-            return generateVStack(insertingText: insertingText, spaces: spaces)
+            return generateVStack(insertingText: insertingText, spaces: spaces, xml: xml)
         case .view:
             if elementType == .xib && spaces == 0 {
                 return generateRootView(insertingText: insertingText, spaces: spaces, xml: xml)
             } else {
-                return generateVStack(insertingText: insertingText, spaces: spaces)
+                return generateVStack(insertingText: insertingText, spaces: spaces, xml: xml)
             }
         case .button:
-            return generateButton(insertingText: insertingText, spaces: spaces)
+            return generateButton(insertingText: insertingText, spaces: spaces, xml: xml)
         case .stackView:
             switch xml.xmlAttributes["axis"] {
             case "vertical":
-                return generateVStack(insertingText: insertingText, spaces: spaces)
+                return generateVStack(insertingText: insertingText, spaces: spaces, xml: xml)
             default:
-                return generateHStack(insertingText: insertingText, spaces: spaces)
+                return generateHStack(insertingText: insertingText, spaces: spaces, xml: xml)
             }
         case .activityIndicatorView:
-            return generateActivityView(insertingText: insertingText, spaces: spaces)
+            return generateActivityView(insertingText: insertingText, spaces: spaces, xml: xml)
         case .pageControl:
-            return generatePageControl(insertingText: insertingText, spaces: spaces)
+            return generatePageControl(insertingText: insertingText, spaces: spaces, xml: xml)
         case .switchControl:
-            return generateSwitchControl(insertingText: insertingText, spaces: spaces)
+            return generateSwitchControl(insertingText: insertingText, spaces: spaces, xml: xml)
         case .segmentedControl:
-            return generateSegmentedControl(insertingText: insertingText, spaces: spaces)
+            return generateSegmentedControl(insertingText: insertingText, spaces: spaces, xml: xml)
         case .textView:
-            return generateTextView(insertingText: insertingText, spaces: spaces)
+            return generateTextView(insertingText: insertingText, spaces: spaces, xml: xml)
         case .textField:
-            return generateTextField(insertingText: insertingText,spaces: spaces)
+            return generateTextField(insertingText: insertingText,spaces: spaces, xml: xml)
         case .collectionView:
-            return generateСollectionView(insertingText: insertingText, spaces: spaces)
+            return generateСollectionView(insertingText: insertingText, spaces: spaces, xml: xml)
         case .collectionViewCell:
-            return generateHStack(insertingText: insertingText, spaces: spaces)
+            return generateHStack(insertingText: insertingText, spaces: spaces, xml: xml)
         case .viewController:
             return generateRootView(insertingText: insertingText, spaces: spaces, xml: xml)
         }
         
     }
     
-    private func generateTableView(insertingText: String = "", spaces: Int) -> String {
+    private func generateTableView(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         return
             """
@@ -87,7 +87,7 @@ class ElementGenerator {
             """
     }
     
-    private func generateСollectionView(insertingText: String = "", spaces: Int) -> String {
+    private func generateСollectionView(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         return
             """
@@ -102,24 +102,26 @@ class ElementGenerator {
             """
     }
     
-    private func generateHStack(insertingText: String = "", spaces: Int) -> String {
+    private func generateHStack(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         return
             """
             \(spacesString)HStack() {
             \(insertingText)
             \(spacesString)}
+            \(spacesString).\(generateColor(xml.color))
 
             """
     }
     
-    private func generateVStack(insertingText: String = "", spaces: Int) -> String {
+    private func generateVStack(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         return
             """
             \(spacesString)VStack() {
             \(insertingText)
             \(spacesString)}
+            \(spacesString)\(generateColor(xml.color))
 
             """
     }
@@ -137,7 +139,7 @@ class ElementGenerator {
             """
     }
     
-    private func skipElment(insertingText: String = "", spaces: Int) -> String {
+    private func skipElment(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         return
             """
@@ -145,25 +147,28 @@ class ElementGenerator {
             """
     }
     
-    private func generateLabel(insertingText: String = "", spaces: Int) -> String {
+    private func generateLabel(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         let text = insertingText
         return
             """
-            \(spacesString)Text("")\(text)
+            \(spacesString)Text("Text")\(text)
 
             """
     }
     
-    private func generateImageView(insertingText: String = "", spaces: Int, attributes: [String: String]) -> String {
+    private func generateImageView(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         var text = insertingText
-        if let contentMode = attributes["contentMode"] {
+        if let contentMode = xml.xmlAttributes["contentMode"] {
+            text.append("\n\(spacesString).resizable()")
             if contentMode.contains("Fit") {
                 text.append("\n\(spacesString).aspectRatio(contentMode: .fit)")
             } else {
-                text.append("\n.aspectRatio(contentMode: .fill)")
+                text.append("\n\(spacesString).aspectRatio(contentMode: .fill)")
             }
+            text.append("\n\(spacesString).border(Color.black, width: /*@START_MENU_TOKEN@*/1/*@END_MENU_TOKEN@*/)")
+            text.append("\n\(spacesString).\(generateRect(xml.rect))")
         }
         return
             """
@@ -172,7 +177,7 @@ class ElementGenerator {
             """
     }
     
-    private func generateButton(insertingText: String = "", spaces: Int) -> String {
+    private func generateButton(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         let text = insertingText
         return
@@ -180,12 +185,12 @@ class ElementGenerator {
             \(spacesString)Button(action: {}) {
             \(spacesString) Text("Button")
             \(text)
-            }
+            \(spacesString)}
 
             """
     }
     
-    private func generateTextField(insertingText: String = "", spaces: Int) -> String {
+    private func generateTextField(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         let text = insertingText
         return
@@ -195,7 +200,7 @@ class ElementGenerator {
             """
     }
     
-    private func generateTextView(insertingText: String = "", spaces: Int) -> String {
+    private func generateTextView(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         let text = insertingText
         makeTextView()
@@ -206,7 +211,7 @@ class ElementGenerator {
             """
     }
     
-    private func generateActivityView(insertingText: String = "", spaces: Int) -> String {
+    private func generateActivityView(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         let text = insertingText
         makeActivityView()
@@ -217,7 +222,7 @@ class ElementGenerator {
             """
     }
     
-    private func generateSwitchControl(insertingText: String = "", spaces: Int) -> String {
+    private func generateSwitchControl(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         let text = insertingText
         return
@@ -227,7 +232,7 @@ class ElementGenerator {
             """
     }
     
-    private func generatePageControl(insertingText: String = "", spaces: Int) -> String {
+    private func generatePageControl(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         let text = insertingText
         makePageControl()
@@ -238,7 +243,7 @@ class ElementGenerator {
             """
     }
     
-    private func generateSegmentedControl(insertingText: String = "", spaces: Int) -> String {
+    private func generateSegmentedControl(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         let text = insertingText
         return
@@ -487,4 +492,15 @@ class ElementGenerator {
         }))
         return res
     }
+    
+    func generateRect(_ rect: CGRect?) -> String {
+        guard let rect = rect else { return "" }
+        return "frame(width: \(rect.width), height: \(rect.height), alignment: .leading)"
+    }
+    
+    func generateColor(_ color: NSColor?) -> String {
+        guard let color = color else { return "" }
+        return ".background(Color(red: \(color.redComponent), green: \(color.greenComponent), blue: \(color.blueComponent)))"
+    }
+    
 }
