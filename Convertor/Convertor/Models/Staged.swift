@@ -44,6 +44,17 @@ extension XML {
         }
     }
     
+    var buttonImage: String? {
+        get {
+            if let color = self.xmlChildren.first(where: {$0.xmlName == "state"}),
+               let imageName = color.xmlAttributes["image"] {
+                return imageName
+            } else {
+                return nil
+            }
+        }
+    }
+    
     var color: NSColor? {
         get {
             if let color = self.xmlChildren.first(where: {$0.xmlName == "color"}),

@@ -764,10 +764,10 @@
                                         <rect key="frame" x="180" y="76" width="144" height="288"/>
                                         <subviews>
                                             <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="mDz-Nf-aBt">
-                                                <rect key="frame" x="48" y="120" width="48" height="48"/>
+                                                <rect key="frame" x="36" y="108" width="72" height="72"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="height" constant="48" id="c4o-JL-eGR"/>
-                                                    <constraint firstAttribute="width" constant="48" id="wqN-Vi-e4r"/>
+                                                    <constraint firstAttribute="height" constant="72" id="c4o-JL-eGR"/>
+                                                    <constraint firstAttribute="width" constant="72" id="wqN-Vi-e4r"/>
                                                 </constraints>
                                                 <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="Iwu-rF-ZwC"/>
                                             </imageView>

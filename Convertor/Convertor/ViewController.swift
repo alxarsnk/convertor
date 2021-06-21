@@ -101,19 +101,19 @@ class ViewController: NSViewController, DropViewDelegate {
                 }
             }
         } else {
-           print("Saved")
+            print("Saved")
         }
     }
     
     private func chooseProjectButtonPressed() {
         let dialog = NSOpenPanel();
-
+        
         dialog.title = "Choose a file or project";
         dialog.showsResizeIndicator = true
         dialog.showsHiddenFiles = false
         dialog.allowsMultipleSelection = false
         dialog.canChooseDirectories = true
-
+        
         if (dialog.runModal() ==  NSApplication.ModalResponse.OK) {
             let result = dialog.url
             if (result != nil) {
@@ -132,6 +132,8 @@ class ViewController: NSViewController, DropViewDelegate {
                         } catch let error {
                             print("error: \(error)")
                         }
+                        self.activityView.isHidden = false
+                        self.activityView.startAnimation(self)
                         let enumerator = FileManager.default.enumerator(at: filename!, includingPropertiesForKeys: [.isRegularFileKey], options: [.skipsHiddenFiles, .skipsPackageDescendants])
                         for case let fileURL as URL in enumerator! {
                             do {
@@ -248,7 +250,7 @@ class ViewController: NSViewController, DropViewDelegate {
     }
     
     private func setupCOnvertedReadyState() {
-        leftImageView.image = #imageLiteral(resourceName: "storyboardFileIcon")
+        leftImageView.image = isProject ? #imageLiteral(resourceName: "folderIcon") : #imageLiteral(resourceName: "storyboardFileIcon")
         leftImageView.imageAlignment = .alignCenter
     }
     
@@ -290,39 +292,33 @@ class ViewController: NSViewController, DropViewDelegate {
             .dropLast())
         fileName = "New"+fileName
         self.fileName = fileName + ".swift"
-//        if fileName.contains("Main") {
-//            fileText.append(
-//                ElementGenerator.shared.createDebugFile(name: fileName)
-//            )
-//        } else {
-            fileText.append(
-                ElementGenerator.shared.generateHeader(
-                    fileName: fileName
-                )
+        fileText.append(
+            ElementGenerator.shared.generateHeader(
+                fileName: fileName
             )
-            
-            fileText.append(
-                ElementGenerator.shared.generateTemplate(
-                    fileName: fileName, completion: {
-                        models = []
-                        return beginParsing()
-                    }
-                )
+        )
+        
+        fileText.append(
+            ElementGenerator.shared.generateTemplate(
+                fileName: fileName, completion: {
+                    models = []
+                    return beginParsing()
+                }
             )
-//        }
+        )
         contentsFile[path] = fileText
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
             self?.activityView.stopAnimation(self)
             self?.activityView.isHidden = true
             self?.rightLabel.isHidden = true
-            self?.rightImageView.image = #imageLiteral(resourceName: "swiftFIleIcon")
+            self?.rightImageView.image = (self?.isProject ?? false) ? #imageLiteral(resourceName: "folderIcon") : #imageLiteral(resourceName: "swiftFIleIcon")
             self?.rightImageView.imageAlignment = .alignCenter
             self?.saveButton.isHidden = false
             self?.rightLabel.isHidden = false
-            self?.rightLabel.stringValue = self?.fileName ?? ""
+            self?.rightLabel.stringValue = (self?.isProject ?? false) ? "SwiftUIApp" : self?.fileName ?? ""
         }
     }
-
+    
     // MARK: - Драг'n'дроп делегат
     
     func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
@@ -342,9 +338,9 @@ class ViewController: NSViewController, DropViewDelegate {
         getXmlChildrens(for: soucrseXML, level: 0, rootId: nil)
         return
             generateSwiftUIStruct(with: 0, rootId: nil, elementType: elementType)
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-                .components(separatedBy: .newlines)
-                .filter{!$0.isEmpty}.joined(separator: "\n")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .components(separatedBy: .newlines)
+            .filter{!$0.isEmpty}.joined(separator: "\n")
     }
     
     // MARK: - Рекрурсивно пройтись по XML файлу и сгенирировать промежутчоные модели
@@ -382,7 +378,7 @@ class ViewController: NSViewController, DropViewDelegate {
         let model = StagedModel(xml: xml, level: level, rootId: rootId)
         models.append(model)
         if xml.customClass != nil {
-//            print(xml.customClass!)
+            //            print(xml.customClass!)
         }
         return model.id
     }
@@ -417,5 +413,5 @@ class ViewController: NSViewController, DropViewDelegate {
         }
         return ""
     }
- 
+    
 }

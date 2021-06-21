@@ -16,6 +16,8 @@ class ElementGenerator {
     private var isPageCotnrolAdded = false
     private var isTextViewAdded = false
     private var isBodyExists = false
+    private var isTabbarExist = false
+    private var isNavBarExist = false
     
     func clearData() {
         isActivityViewAdded = false
@@ -41,9 +43,11 @@ class ElementGenerator {
             return generateVStack(insertingText: insertingText, spaces: spaces, xml: xml)
         case .view:
             if elementType == .xib && spaces == 0 {
-                return generateRootView(insertingText: insertingText, spaces: spaces, xml: xml)
-            } else {
+                return generateRootView(insertingText: insertingText, spaces: spaces, xml: xml, isVc: false)
+            } else if (xml.rect?.width ?? 0) / 2 <= xml.rect?.height ?? 0 {
                 return generateVStack(insertingText: insertingText, spaces: spaces, xml: xml)
+            } else {
+                return generateHStack(insertingText: insertingText, spaces: spaces, xml: xml)
             }
         case .button:
             return generateButton(insertingText: insertingText, spaces: spaces, xml: xml)
@@ -71,7 +75,7 @@ class ElementGenerator {
         case .collectionViewCell:
             return generateHStack(insertingText: insertingText, spaces: spaces, xml: xml)
         case .viewController:
-            return generateRootView(insertingText: insertingText, spaces: spaces, xml: xml)
+            return generateRootView(insertingText: insertingText, spaces: spaces, xml: xml, isVc: true)
         }
         
     }
@@ -109,7 +113,7 @@ class ElementGenerator {
             \(spacesString)HStack() {
             \(insertingText)
             \(spacesString)}
-            \(spacesString).\(generateColor(xml.color))
+            \(spacesString)\(generateColor(xml.color))
 
             """
     }
@@ -126,16 +130,47 @@ class ElementGenerator {
             """
     }
     
-    private func generateRootView(insertingText: String = "", spaces: Int, xml: XML) -> String {
+    private func generateRootView(insertingText: String = "", spaces: Int, xml: XML, isVc: Bool) -> String {
+        var headers: String = ""
+        
+        if isVc {
+            headers = """
+            TabView {
+                NavigationView {
+                    \(insertingText)
+                    .navigationBarTitle("News")
+                }
+                .tabItem {
+                    Image(systemName: "star.fill")
+                        Text("Favourite")
+                    }
+                    Text("The content of the second view")
+                        .tabItem {
+                            Image(systemName: "clock.fill")
+                            Text("History")
+                }
+            }
+            """
+        } else {
+            
+        }
+        
         let title = isBodyExists ? xml.xmlName : "body"
         let spacesString = String(repeating: " ", count: spaces)
+        
+        
         isBodyExists = true
-        return
+        return isVc ?
             """
+            \(spacesString)var \(title): some View {
+            \(headers)
+            \(spacesString)}
+
+            """
+            : """
             \(spacesString)var \(title): some View {
             \(insertingText)
             \(spacesString)}
-
             """
     }
     
@@ -153,7 +188,8 @@ class ElementGenerator {
         return
             """
             \(spacesString)Text("Text")\(text)
-
+            \(spacesString)Spacer(minLength: 20)
+            
             """
     }
     
@@ -167,12 +203,16 @@ class ElementGenerator {
             } else {
                 text.append("\n\(spacesString).aspectRatio(contentMode: .fill)")
             }
-            text.append("\n\(spacesString).border(Color.black, width: /*@START_MENU_TOKEN@*/1/*@END_MENU_TOKEN@*/)")
             text.append("\n\(spacesString).\(generateRect(xml.rect))")
+            text.append("\n\(spacesString).cornerRadius(16)")
+        }
+        var imageInit = "uiImage: UIImage()"
+        if let intial = xml.xmlAttributes["image"] {
+            imageInit = "\"\(intial)\""
         }
         return
             """
-            \(spacesString)Image(uiImage: UIImage())\(text)
+            \(spacesString)Image(\(imageInit))\(text)
 
             """
     }
@@ -180,10 +220,13 @@ class ElementGenerator {
     private func generateButton(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
         let text = insertingText
+        let imageInit = xml.buttonImage == nil ? "uiImage: UIImage()" : "\"\(xml.buttonImage!)\""
         return
             """
             \(spacesString)Button(action: {}) {
-            \(spacesString) Text("Button")
+            \(spacesString) Image(\(imageInit))
+            \(spacesString) .resizable()
+            \(spacesString) .\(generateRect(xml.rect))
             \(text)
             \(spacesString)}
 
@@ -431,66 +474,6 @@ class ElementGenerator {
         
         }
         """
-    }
-    
-    func createDebugFile(name: String) -> String {
-        var res = ""
-        res.append(generateHeader(fileName: name))
-        res.append(generateTemplate(fileName: name, completion: { () -> String in
-            return """
-            let dataSource: [User] = Array.init(repeating: User(), count: 15)
-            
-            @State private var text = Text("Name")
-            
-            var body: some View {
-                TabView {
-                    NavigationView {
-                        List(dataSource) { model in
-                            VStack(alignment: .leading) {
-                                Image(uiImage: model.postImage)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .cornerRadius(8)
-                                Spacer().frame(width: 0, height: 12, alignment: .bottom)
-                                HStack {
-                                    Image(uiImage: model.avatarImage)
-                                        .resizable()
-                                        .frame(width: 48, height: 48, alignment: .leading)
-                                        .cornerRadius(24)
-                                        .aspectRatio(contentMode: .fill)
-                                    text
-                                    Spacer(minLength: 20)
-                                    Button(action: {
-                                        model.isLiked = !model.isLiked
-                                    }) {
-                                        Image(model.isLiked ? "isLiked" : "notLiked")
-                                            .resizable()
-                                            .frame(width: 24, height: 24, alignment: .trailing)
-                                    }
-                                    Image("arrow")
-                                        .resizable()
-                                        .frame(width: 24, height: 24, alignment: .leading)
-                                }
-                            }
-                            .background(Color(red: 0.9, green: 0.9, blue: 0.9))
-                            .cornerRadius(12)
-                            .padding(EdgeInsets(top: 4, leading: 4, bottom: 4, trailing: 4))
-                        }
-                        .navigationBarTitle("News")
-                    }.tabItem {
-                        Image(systemName: "star.fill")
-                        Text("Favourite")
-                    }
-                    Text("The content of the second view")
-                        .tabItem {
-                            Image(systemName: "clock.fill")
-                            Text("History")
-                        }
-                }
-            }
-            """
-        }))
-        return res
     }
     
     func generateRect(_ rect: CGRect?) -> String {
