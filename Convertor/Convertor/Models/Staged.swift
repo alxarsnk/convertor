@@ -24,7 +24,7 @@ class StagedModel {
     }
     
     func getDescription() -> String {
-        return "Name: \(xml.xmlName) level: \(level)"//, id: \(id), rootId: \(rootId)"
+        return "Name: \(xml.xmlName) level: \(level)"
     }
 }
 

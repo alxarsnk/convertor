@@ -735,7 +735,7 @@
                                 <subviews>
                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ahM-NE-DAx">
                                         <rect key="frame" x="178" y="16" width="148" height="48"/>
-                                        <textFieldCell key="cell" alignment="center" title="Здесь появится конвертирвоанный файл" id="fHh-Kf-NOy" customClass="CustomTextFieldCell" customModule="Convertor" customModuleProvider="target">
+                                        <textFieldCell key="cell" alignment="center" title="Здесь появится конвертированный результат" id="fHh-Kf-NOy" customClass="CustomTextFieldCell" customModule="Convertor" customModuleProvider="target">
                                             <font key="font" metaFont="system"/>
                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="systemRedColor" catalog="System" colorSpace="catalog"/>
