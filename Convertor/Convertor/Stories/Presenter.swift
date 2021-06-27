@@ -75,11 +75,11 @@ extension Presenter {
                     && !$0.lastPathComponent.contains("LaunchScreen")
             }
             .forEach {
-                print($0.path)
-                let file = File(path: $0.path)
+                let file = File(path: $0.path, filesInProject: filesInProjects)
                 contentsFile[$0.path] = file.generatedContent
             }
         self.convertProject()
+        self.configureSceneDeleagte()
         self.replaceFiles()
         self.view?.setupFinishState(isProject: isProject, file: nil)
     }
@@ -93,7 +93,9 @@ extension Presenter {
         (((dict!["UIApplicationSceneManifest"] as! NSMutableDictionary)["UISceneConfigurations"] as! NSMutableDictionary)["UIWindowSceneSessionRoleApplication"] as! [NSMutableDictionary]).first!["UISceneStoryboardFile"] = nil
         dict!["UIMainStoryboardFile"] = nil
         dict?.write(toFile: infoPlistPath, atomically: true)
-        
+    }
+    
+    func configureSceneDeleagte() {
         let sceneDelagtePath = filesInProjects.filter {
             ($0.lastPathComponent.contains("SceneDelegate.swift"))
         }.first!.path
@@ -109,7 +111,32 @@ extension Presenter {
             .reversed()
             .dropLast())
         fileName = "New"+fileName
-        try! ElementGenerator.shared.createSceneDelegate(nameOfFile: fileName)
+        
+        var sceneDelagteContent = ""
+        
+        if let aStreamReader = StreamReader(path: sceneDelagtePath) {
+            defer {
+                aStreamReader.close()
+            }
+            while let line = aStreamReader.nextLine() {
+                sceneDelagteContent.append(line + "\n")
+            }
+        }
+        
+        var lines = sceneDelagteContent.components(separatedBy: "\n")
+        
+        for (index, line) in lines.enumerated() {
+            if line.contains("import UIKit") {
+                lines[index] = line + "\nimport SwiftUI"
+            } else if line.contains("(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions)")  {
+                lines[index] = line + "\n"+ElementGenerator.createSceneDelegate(nameOfFile: fileName)
+            }
+        }
+        
+        sceneDelagteContent = lines.joined(separator: "\n")
+        
+        
+        try! sceneDelagteContent
             .write(toFile: sceneDelagtePath, atomically: true, encoding: .utf8)
     }
     

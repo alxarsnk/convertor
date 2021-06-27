@@ -10,74 +10,73 @@ import SwiftyXML
 
 class ElementGenerator {
     
-    static var shared = ElementGenerator()
-    
     private var isActivityViewAdded = false
     private var isPageCotnrolAdded = false
     private var isTextViewAdded = false
     private var isBodyExists = false
-    private var isTabbarExist = false
     private var isNavBarExist = false
+    private var outletsAdded = false
     
-    func clearData() {
-        isActivityViewAdded = false
-        isPageCotnrolAdded = false
-        isTextViewAdded = false
-        isBodyExists = false
-    }
+    var isTabbarExist = false
+    
+    var outlets: Outlets = []
     
     private var customElements = ""
     
-    private init() { }
+    init() { }
     
-    func generateElement(from xml: XML, insertingText: String, spaces: Int, elementType: ViewType) -> String {
-        guard let element = ElementType(rawValue: xml.xmlName) else { return skipElment(insertingText: insertingText, spaces: spaces, xml: xml) }
-        switch element {
-        case .tableView:
-            return generateTableView(insertingText: insertingText, spaces: spaces, xml: xml)
-        case .imageView:
-            return generateImageView(insertingText: insertingText, spaces: spaces, xml: xml)
-        case .label:
-            return generateLabel(insertingText: insertingText, spaces: spaces, xml: xml)
-        case .tableViewCell:
-            return generateVStack(insertingText: insertingText, spaces: spaces, xml: xml)
-        case .view:
-            if elementType == .xib && spaces == 0 {
-                return generateRootView(insertingText: insertingText, spaces: spaces, xml: xml, isVc: false)
-            } else if (xml.rect?.width ?? 0) / 2 <= xml.rect?.height ?? 0 {
+    func generateElement(from xml: XML, insertingText: String, spaces: Int, elementType: ViewType, isForOutlets: Bool = true) -> String {
+        if !outlets.map { $0.id }.contains(xml.id) || !isForOutlets {
+            guard let element = ElementType(rawValue: xml.xmlName) else { return skipElment(insertingText: insertingText, spaces: spaces, xml: xml) }
+            switch element {
+            case .tableView:
+                return generateTableView(insertingText: insertingText, spaces: spaces, xml: xml)
+            case .imageView:
+                return generateImageView(insertingText: insertingText, spaces: spaces, xml: xml)
+            case .label:
+                return generateLabel(insertingText: insertingText, spaces: spaces, xml: xml)
+            case .tableViewCell:
                 return generateVStack(insertingText: insertingText, spaces: spaces, xml: xml)
-            } else {
+            case .view:
+                if elementType == .xib && spaces == 0 {
+                    return generateRootView(insertingText: insertingText, spaces: spaces, xml: xml, isVc: false)
+                } else if (xml.rect?.width ?? 0) / 2 <= xml.rect?.height ?? 0 {
+                    return generateVStack(insertingText: insertingText, spaces: spaces, xml: xml)
+                } else {
+                    return generateHStack(insertingText: insertingText, spaces: spaces, xml: xml)
+                }
+            case .button:
+                return generateButton(insertingText: insertingText, spaces: spaces, xml: xml)
+            case .stackView:
+                switch xml.xmlAttributes["axis"] {
+                case "vertical":
+                    return generateVStack(insertingText: insertingText, spaces: spaces, xml: xml)
+                default:
+                    return generateHStack(insertingText: insertingText, spaces: spaces, xml: xml)
+                }
+            case .activityIndicatorView:
+                return generateActivityView(insertingText: insertingText, spaces: spaces, xml: xml)
+            case .pageControl:
+                return generatePageControl(insertingText: insertingText, spaces: spaces, xml: xml)
+            case .switchControl:
+                return generateSwitchControl(insertingText: insertingText, spaces: spaces, xml: xml)
+            case .segmentedControl:
+                return generateSegmentedControl(insertingText: insertingText, spaces: spaces, xml: xml)
+            case .textView:
+                return generateTextView(insertingText: insertingText, spaces: spaces, xml: xml)
+            case .textField:
+                return generateTextField(insertingText: insertingText,spaces: spaces, xml: xml)
+            case .collectionView:
+                return generateСollectionView(insertingText: insertingText, spaces: spaces, xml: xml)
+            case .collectionViewCell:
                 return generateHStack(insertingText: insertingText, spaces: spaces, xml: xml)
+            case .viewController:
+                return generateRootView(insertingText: insertingText, spaces: spaces, xml: xml, isVc: true)
             }
-        case .button:
-            return generateButton(insertingText: insertingText, spaces: spaces, xml: xml)
-        case .stackView:
-            switch xml.xmlAttributes["axis"] {
-            case "vertical":
-                return generateVStack(insertingText: insertingText, spaces: spaces, xml: xml)
-            default:
-                return generateHStack(insertingText: insertingText, spaces: spaces, xml: xml)
-            }
-        case .activityIndicatorView:
-            return generateActivityView(insertingText: insertingText, spaces: spaces, xml: xml)
-        case .pageControl:
-            return generatePageControl(insertingText: insertingText, spaces: spaces, xml: xml)
-        case .switchControl:
-            return generateSwitchControl(insertingText: insertingText, spaces: spaces, xml: xml)
-        case .segmentedControl:
-            return generateSegmentedControl(insertingText: insertingText, spaces: spaces, xml: xml)
-        case .textView:
-            return generateTextView(insertingText: insertingText, spaces: spaces, xml: xml)
-        case .textField:
-            return generateTextField(insertingText: insertingText,spaces: spaces, xml: xml)
-        case .collectionView:
-            return generateСollectionView(insertingText: insertingText, spaces: spaces, xml: xml)
-        case .collectionViewCell:
-            return generateHStack(insertingText: insertingText, spaces: spaces, xml: xml)
-        case .viewController:
-            return generateRootView(insertingText: insertingText, spaces: spaces, xml: xml, isVc: true)
+        } else {
+            let spacesString = String(repeating: " ", count: spaces)
+            return "\(spacesString) \(outlets.first(where: { $0.id == xml.id })!.name)"
         }
-        
     }
     
     private func generateTableView(insertingText: String = "", spaces: Int, xml: XML) -> String {
@@ -133,26 +132,38 @@ class ElementGenerator {
     private func generateRootView(insertingText: String = "", spaces: Int, xml: XML, isVc: Bool) -> String {
         var headers: String = ""
         
-        if isVc {
-            headers = """
-            TabView {
+        let navBarXML = xml.xmlChildren.first(where: {$0.xmlName == "navigationItem"})
+        var navBarText = ""
+        if navBarXML != nil {
+            navBarText = """
                 NavigationView {
                     \(insertingText)
-                    .navigationBarTitle("News")
+                    .navigationBarTitle("\(navBarXML!.xmlAttributes["title"]!)")
                 }
+            """
+        } else {
+            navBarText = insertingText
+        }
+        
+        var tabBarText = ""
+        
+        if isTabbarExist {
+            tabBarText = """
+            TabView {
+                \(navBarText)
                 .tabItem {
-                    Image(systemName: "star.fill")
-                        Text("Favourite")
-                    }
-                    Text("The content of the second view")
-                        .tabItem {
-                            Image(systemName: "clock.fill")
-                            Text("History")
+                    Text("Tab")
                 }
             }
             """
         } else {
-            
+            tabBarText = navBarText
+        }
+        
+        if isVc {
+            headers = """
+            \(tabBarText)
+            """
         }
         
         let title = isBodyExists ? xml.xmlName : "body"
@@ -162,6 +173,7 @@ class ElementGenerator {
         isBodyExists = true
         return isVc ?
             """
+            \(spacesString)\(generateSwiftUIOutlets())
             \(spacesString)var \(title): some View {
             \(headers)
             \(spacesString)}
@@ -184,10 +196,12 @@ class ElementGenerator {
     
     private func generateLabel(insertingText: String = "", spaces: Int, xml: XML) -> String {
         let spacesString = String(repeating: " ", count: spaces)
-        let text = insertingText
+        var text = insertingText
+        let textName = xml.xmlAttributes["text"] ?? ""
+        text.append("\n\(spacesString).\(generateRect(xml.rect))")
         return
             """
-            \(spacesString)Text("Text")\(text)
+            \(spacesString)Text("\(textName)")\(text)
             \(spacesString)Spacer(minLength: 20)
             
             """
@@ -425,54 +439,13 @@ class ElementGenerator {
         customElements.append(textView)
     }
     
-    func createSceneDelegate(nameOfFile: String) -> String {
+    static func createSceneDelegate(nameOfFile: String) -> String {
         return """
-        import UIKit
-        import SwiftUI
-        
-        class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-        
-            var window: UIWindow?
-        
-        
-            func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions)         {
-        
                 guard let windowScene = scene as? UIWindowScene else { return }
                 let window = UIWindow(windowScene: windowScene)
                 window.rootViewController = UIHostingController(rootView: \(nameOfFile)())
                 self.window = window
                 window.makeKeyAndVisible()
-            }
-        
-            func sceneDidDisconnect(_ scene: UIScene) {
-                // Called as the scene is being released by the system.
-                // This occurs shortly after the scene enters the background, or when its session is discarded.
-                // Release any resources associated with this scene that can be re-created the next time the scene connects.
-                // The scene may re-connect later, as its session was not necessarily discarded (see         `application:didDiscardSceneSessions` instead).
-            }
-        
-            func sceneDidBecomeActive(_ scene: UIScene) {
-                // Called when the scene has moved from an inactive state to an active state.
-                // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
-            }
-        
-            func sceneWillResignActive(_ scene: UIScene) {
-                // Called when the scene will move from an active state to an inactive state.
-                // This may occur due to temporary interruptions (ex. an incoming phone call).
-            }
-        
-            func sceneWillEnterForeground(_ scene: UIScene) {
-                // Called as the scene transitions from the background to the foreground.
-                // Use this method to undo the changes made on entering the background.
-            }
-        
-            func sceneDidEnterBackground(_ scene: UIScene) {
-                // Called as the scene transitions from the foreground to the background.
-                // Use this method to save data, release shared resources, and store enough scene-specific state information
-                // to restore the scene back to its current state.
-            }
-        
-        }
         """
     }
     
@@ -484,6 +457,23 @@ class ElementGenerator {
     func generateColor(_ color: NSColor?) -> String {
         guard let color = color else { return "" }
         return ".background(Color(red: \(color.redComponent), green: \(color.greenComponent), blue: \(color.blueComponent)))"
+    }
+    
+    func generateSwiftUIOutlets() -> String {
+        guard !outletsAdded else { return "" }
+        var states: [String] = []
+        for outlet in outlets {
+            states
+                .append(
+                    """
+                    var \(outlet.name): some View {
+                    \(outlet.insertingText)
+                    }
+                    """
+                )
+        }
+        outletsAdded = true
+        return states.joined(separator: "\n")+"\n"
     }
     
 }

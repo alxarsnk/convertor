@@ -10,15 +10,24 @@ import SwiftyXML
 
 class File {
     
+    private var elementGenerator: ElementGenerator
+    
     var path: String
     var fileURL: URL?
     var fileName: String = ""
     var content: String = ""
     var generatedContent: String = ""
     var models: StagedModels = []
+    var customClassFilePath: String = ""
+    var customClassFileContent: String = ""
+    private var filesInProject: [URL]?
+    private var outlets: Outlets = []
+    private var vcConnections: [String: String] = [:]
     
-    init(path: String) {
+    init(path: String, filesInProject: [URL]? = nil) {
         self.path = path
+        self.filesInProject = filesInProject
+        elementGenerator = ElementGenerator()
         readContent()
     }
     
@@ -43,13 +52,13 @@ class File {
         fileName = "New"+fileName
         self.fileName = fileName + ".swift"
         generatedContent.append(
-            ElementGenerator.shared.generateHeader(
+            elementGenerator.generateHeader(
                 fileName: fileName
             )
         )
         
         generatedContent.append(
-            ElementGenerator.shared.generateTemplate(
+            elementGenerator.generateTemplate(
                 fileName: fileName, completion: {
                     models = []
                     return beginParsing()
@@ -63,6 +72,7 @@ class File {
         let elementType: ViewType = xml.scenes.xml == nil ? .xib : .storyboard
         guard let soucrseXML = xml.scenes.xml ?? xml.objects.xml else { return "Error" }
         getXmlChildrens(for: soucrseXML, level: 0, rootId: nil)
+        configureOutletsWithOwnContent()
         return
             generateSwiftUIStruct(with: 0, rootId: nil, elementType: elementType)
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -95,6 +105,8 @@ class File {
             } else if children.xmlName == "viewController" {
                 let id = getInfoAboutXML(children, level: level, rootId: rootId)
                 getXmlChildrens(for: children.view.subviews.xml!, level: level + 1, rootId: id)
+            } else if children.xmlName == "tabBarController" {
+                elementGenerator.isTabbarExist = true
             } else {
                 getInfoAboutXML(children, level: level, rootId: rootId)
             }
@@ -104,14 +116,19 @@ class File {
     func getInfoAboutXML(_ xml: XML, level: Int, rootId: UUID?) -> UUID {
         let model = StagedModel(xml: xml, level: level, rootId: rootId)
         models.append(model)
-        if xml.customClass != nil { }
+        if let name = xml.customClass,
+           name.lowercased().contains("viewcontroller") && customClassFilePath == "",
+           filesInProject?.isEmpty != nil {
+            getVCConnections(xml: xml)
+            getFileOfCustomClass(name: xml.customClass!)
+        }
         return model.id
     }
     
     
     // MARK: - Рекурсивно пройтись по моделям и сгенировать SwiftUI структуру
     
-    func generateSwiftUIStruct(with nestedIndex: Int, rootId: UUID?, elementType: ViewType) -> String {
+    func generateSwiftUIStruct(with nestedIndex: Int, rootId: UUID?, elementType: ViewType, isForOutlets: Bool = true) -> String {
         while nestedIndex <= models.count - 1 {
             var result = ""
             var filteredArray = StagedModels()
@@ -122,7 +139,7 @@ class File {
             }
             filteredArray.forEach({ element in
                 result.append(
-                    ElementGenerator.shared.generateElement(
+                    elementGenerator.generateElement(
                         from: element.xml,
                         insertingText: generateSwiftUIStruct(
                             with: nestedIndex + 1,
@@ -130,7 +147,8 @@ class File {
                             elementType: elementType
                         ),
                         spaces: element.level,
-                        elementType: elementType
+                        elementType: elementType,
+                        isForOutlets: isForOutlets
                     )
                 )
             })
@@ -139,6 +157,49 @@ class File {
         return ""
     }
     
+    private func getFileOfCustomClass(name: String) {
+        guard !vcConnections.isEmpty else { return }
+        let fileName = name+".swift"
+        customClassFilePath = fileName
+        let fullPathURL = filesInProject!.first(where: {$0.path.contains(fileName)})
+        if fullPathURL != nil {
+            getOutlets(in: fullPathURL!)
+        }
+        
+    }
     
+    private func getOutlets(in file: URL) {
+        if let aStreamReader = StreamReader(path: file.path) {
+            defer {
+                aStreamReader.close()
+            }
+            while let line = aStreamReader.nextLine() {
+                customClassFileContent.append(line + "\n")
+            }
+        }
+        let lines = customClassFileContent.components(separatedBy: "\n")
+        outlets = lines.filter( { $0.contains("@IBOutlet") }).map { Outlet(string: $0) }
+        outlets.map { $0.id = vcConnections[$0.name] ?? "" }
+        elementGenerator.outlets = outlets
+    }
+    
+    private func getVCConnections(xml: XML) {
+        guard let connections = xml.xmlChildren.first(where: {$0.xmlName == "connections"}) else { return }
+        for connection in connections.xmlChildren {
+            guard let id = connection.xmlAttributes["destination"],
+                  let property = connection.xmlAttributes["property"] else { return }
+            vcConnections[property] = id
+        }
+    }
+    
+    private func configureOutletsWithOwnContent() {
+        outlets.forEach { outlet in
+            guard let outletModel = models.first(where: { $0.xml.id == outlet.id }) else { return }
+            outlet.insertingText = generateSwiftUIStruct(with: outletModel.level, rootId: outletModel.rootId, elementType: .storyboard, isForOutlets: false)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .components(separatedBy: .newlines)
+                .filter{!$0.isEmpty}.joined(separator: "\n")
+        }
+    }
     
 }

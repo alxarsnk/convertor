@@ -30,6 +30,16 @@ class StagedModel {
 
 extension XML {
     
+    var id: String? {
+        get {
+            if let id = self.xmlAttributes["id"] {
+                return id
+            } else {
+                return nil
+            }
+        }
+    }
+    
     var rect: CGRect? {
         get {
             if let rect = self.xmlChildren.first(where: {$0.xmlName == "rect"}),

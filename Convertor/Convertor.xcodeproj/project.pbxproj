@@ -14,6 +14,7 @@
 		1B3DB228254751F400930183 /* CustomTextFieldCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B3DB227254751F400930183 /* CustomTextFieldCell.swift */; };
 		1B3DB22D2547544F00930183 /* DropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B3DB22C2547544F00930183 /* DropView.swift */; };
 		1B3DB23125476CAF00930183 /* StreamReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B3DB23025476CAF00930183 /* StreamReader.swift */; };
+		1B64B297268546C200BB400A /* Outlet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B64B296268546C200BB400A /* Outlet.swift */; };
 		1B9E0A05268287A8006A7064 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B9E0A04268287A8006A7064 /* File.swift */; };
 		1B9E0A0F26828F96006A7064 /* PanelWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B9E0A0E26828F96006A7064 /* PanelWorker.swift */; };
 		1BA7995F26813CBD00B53C4C /* Presenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BA7995E26813CBD00B53C4C /* Presenter.swift */; };
@@ -33,6 +34,7 @@
 		1B3DB227254751F400930183 /* CustomTextFieldCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextFieldCell.swift; sourceTree = "<group>"; };
 		1B3DB22C2547544F00930183 /* DropView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropView.swift; sourceTree = "<group>"; };
 		1B3DB23025476CAF00930183 /* StreamReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamReader.swift; sourceTree = "<group>"; };
+		1B64B296268546C200BB400A /* Outlet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Outlet.swift; sourceTree = "<group>"; };
 		1B9E0A04268287A8006A7064 /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
 		1B9E0A0E26828F96006A7064 /* PanelWorker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelWorker.swift; sourceTree = "<group>"; };
 		1BA7995E26813CBD00B53C4C /* Presenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Presenter.swift; sourceTree = "<group>"; };
@@ -104,6 +106,7 @@
 				1B1F52A225881A770044E608 /* Staged.swift */,
 				1B11FAB82598AB8D007CC6D5 /* ElemntType.swift */,
 				1B9E0A04268287A8006A7064 /* File.swift */,
+				1B64B296268546C200BB400A /* Outlet.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -255,6 +258,7 @@
 				1B3DB228254751F400930183 /* CustomTextFieldCell.swift in Sources */,
 				1B11FAB92598AB8D007CC6D5 /* ElemntType.swift in Sources */,
 				1B9E0A05268287A8006A7064 /* File.swift in Sources */,
+				1B64B297268546C200BB400A /* Outlet.swift in Sources */,
 				44DA99232546FC8A00EC9447 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum ElementType: String {
+enum ElementType: String, CaseIterable {
     case tableView
     case tableViewCell
     case imageView
